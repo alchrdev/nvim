@@ -1,0 +1,15 @@
+{
+    "name": "alchr-snippets",
+    "contributes": {
+        "snippets": [
+            {
+                "language": ["markdown"],
+                "path": "./markdown.json"
+            },
+            {
+                "language": ["css"],
+                "path": "./css.json"
+            }
+        ]
+    }
+}
