@@ -1,10 +1,18 @@
 return {
   {
-    "catppuccin/nvim",
+    'craftzdog/solarized-osaka.nvim',
+    enabled = false,
     priority = 1000,
-    name = "catppuccin",
     config = function()
-      require("custom.midnight-monochrome")
+      require('custom.solarized-osaka')
     end,
   },
+  {
+    'folke/tokyonight.nvim',
+    priority = 1000,
+    config = function()
+      require('custom.tokyonight')
+    end,
+  }
 }
+

@@ -1,9 +1,9 @@
 return {
   {
-    "lewis6991/gitsigns.nvim",
+    'lewis6991/gitsigns.nvim',
     lazy = false,
     config = function()
-      require("custom.gitsigns")
+      require('custom.gitsigns')
     end,
   },
 }

@@ -1,26 +1,28 @@
-local custom_theme = require("lualine.themes.catppuccin")
+local custom_theme = require('lualine.themes.tokyonight')
 
--- Make statusbar transparent
-for _, mode in pairs(custom_theme) do
-  for section_name, section in pairs(mode) do
-    if section_name ~= "a" then
-      section.bg = "none"
-    end
+local function diff_source()
+  local gitsigns = vim.b.gitsigns_status_dict
+  if gitsigns then
+    return {
+      added = gitsigns.added,
+      modified = gitsigns.changed,
+      removed = gitsigns.removed,
+    }
   end
 end
 
-require("lualine").setup({
+require('lualine').setup({
   options = {
     theme = custom_theme,
     globalstatus = true,
     icons_enabled = true,
-    section_separators = "",
-    component_separators = "",
+    section_separators = '',
+    component_separators = '',
     disabled_filetypes = {
       statusline = {
-        "help",
-        "neo-tree",
-        "qf",
+        'help',
+        'neo-tree',
+        'qf',
       },
       winbar = {},
     },
@@ -28,40 +30,40 @@ require("lualine").setup({
   sections = {
     lualine_a = {},
     lualine_b = {
-      "fancy_branch",
+      { 'b:gitsigns_head', icon = '' }
     },
     lualine_c = {
       {
-        "filename",
+        'filename',
         path = 1,
         symbols = {
-          modified = "  ",
-          -- readonly = "",
-          -- unnamed = "",
+          modified = '  ',
+          -- readonly = '',
+          -- unnamed = '',
         },
       },
-
       {
-        "fancy_diagnostics",
-        sources = { "nvim_lsp" },
-        symbols = { error = " ", warn = " ", info = " " },
+        'diagnostics',
+        sources = { 'nvim_lsp' },
+        symbols = { error = ' ', warn = ' ', info = ' ' },
       },
-      { "fancy_searchcount" },
+
     },
     lualine_x = {
-      "fancy_diff",
-      "progress",
+      'searchcount',
+      { 'diff', source = diff_source },
     },
-    lualine_y = {},
+    lualine_y = { 'progress'},
     lualine_z = {},
   },
   inactive_sections = {
     lualine_a = {},
     lualine_b = {},
-    lualine_c = { "filename" },
+    lualine_c = { 'filename' },
+    lualine_x = { 'location' },
     lualine_y = {},
     lualine_z = {},
   },
   tabline = {},
-  extensions = { "neo-tree", "lazy" },
+  extensions = { 'neo-tree', 'lazy' },
 })

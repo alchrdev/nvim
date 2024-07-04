@@ -1,37 +1,4 @@
-local icons = require("custom.icons")
-require("gitsigns").setup({
-  signs = {
-    add = {
-      hl = "GitSignsAdd",
-      text = icons.ui.BoldLineLeft,
-      numhl = "GitSignsAddNr",
-      linehl = "GitSignsAddLn",
-    },
-    change = {
-      hl = "GitSignsChange",
-      text = icons.ui.BoldLineLeft,
-      numhl = "GitSignsChangeNr",
-      linehl = "GitSignsChangeLn",
-    },
-    delete = {
-      hl = "GitSignsDelete",
-      text = icons.ui.TriangleShortArrowRight,
-      numhl = "GitSignsDeleteNr",
-      linehl = "GitSignsDeleteLn",
-    },
-    topdelete = {
-      hl = "GitSignsDelete",
-      text = icons.ui.TriangleShortArrowRight,
-      numhl = "GitSignsDeleteNr",
-      linehl = "GitSignsDeleteLn",
-    },
-    changedelete = {
-      hl = "GitSignsChange",
-      text = icons.ui.BoldLineLeft,
-      numhl = "GitSignsChangeNr",
-      linehl = "GitSignsChangeLn",
-    },
-  },
+require('gitsigns').setup({
   signcolumn = true,
   numhl = false,
   linehl = false,
@@ -44,19 +11,19 @@ require("gitsigns").setup({
   current_line_blame = false, -- Toggle with `:Gitsigns toggle_current_line_blame`
   current_line_blame_opts = {
     virt_text = true,
-    virt_text_pos = "eol", -- 'eol' | 'overlay' | 'right_align'
+    virt_text_pos = 'eol', -- 'eol' | 'overlay' | 'right_align'
     delay = 1000,
     ignore_whitespace = false,
   },
-  current_line_blame_formatter = "<author>, <author_time:%Y-%m-%d> - <summary>",
+  current_line_blame_formatter = '<author>, <author_time:%Y-%m-%d> - <summary>',
   sign_priority = 6,
   status_formatter = nil,
   update_debounce = 200,
   max_file_length = 40000,
   preview_config = {
-    border = "single",
-    style = "minimal",
-    relative = "cursor",
+    border = 'single',
+    style = 'minimal',
+    relative = 'cursor',
     row = 0,
     col = 1,
     zindex = 50,
@@ -65,31 +32,31 @@ require("gitsigns").setup({
 
   on_attach = function(bufnr)
     vim.keymap.set(
-      "n",
-      "<leader>H",
-      require("gitsigns").preview_hunk,
-      { buffer = bufnr, desc = "Preview git hunk" }
+      'n',
+      '<leader>H',
+      require('gitsigns').preview_hunk,
+      { buffer = bufnr, desc = 'Preview git hunk' }
     )
 
     -- don't override the built-in and fugitive keymaps
     local gs = package.loaded.gitsigns
-    vim.keymap.set({ "n", "v" }, "]c", function()
+    vim.keymap.set({ 'n', 'v' }, ']c', function()
       if vim.wo.diff then
-        return "]c"
+        return ']c'
       end
       vim.schedule(function()
         gs.next_hunk()
       end)
-      return "<Ignore>"
-    end, { expr = true, buffer = bufnr, desc = "Jump to next hunk" })
-    vim.keymap.set({ "n", "v" }, "[c", function()
+      return '<Ignore>'
+    end, { expr = true, buffer = bufnr, desc = 'Jump to next hunk' })
+    vim.keymap.set({ 'n', 'v' }, '[c', function()
       if vim.wo.diff then
-        return "[c"
+        return '[c'
       end
       vim.schedule(function()
         gs.prev_hunk()
       end)
-      return "<Ignore>"
-    end, { expr = true, buffer = bufnr, desc = "Jump to previous hunk" })
+      return '<Ignore>'
+    end, { expr = true, buffer = bufnr, desc = 'Jump to previous hunk' })
   end,
 })
