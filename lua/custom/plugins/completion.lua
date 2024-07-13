@@ -10,6 +10,7 @@ return {
     'saadparwaiz1/cmp_luasnip', -- for autocompletion
     'onsails/lspkind.nvim',   -- vs-code like pictograms
     'rafamadriz/friendly-snippets',
+    { 'roobert/tailwindcss-colorizer-cmp.nvim', config = true }, -- tailwind color support
   },
   config = function()
     require('custom.completion')

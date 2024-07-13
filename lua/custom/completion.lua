@@ -73,7 +73,8 @@ cmp.setup({
         copilot = '(Copilot)',
         treesitter = '(TreeSitter)',
       })[entry.source.name]
-      return vim_item
+      -- return vim_item
+      return require('tailwindcss-colorizer-cmp').formatter(entry, vim_item)
     end,
   },
 })
