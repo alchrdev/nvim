@@ -1,13 +1,25 @@
+local bg = '#0f1014'
+local bg_dark = '#0f1014'
+local transparent = true
+local util = '#1f202e'
+
 require('tokyonight').setup({
-  transparent = true,
+  transparent = transparent,
   style = 'night',
   styles = {
     sidebars = 'transparent',
     floats = 'transparent',
   },
+  on_colors = function(colors)
+    colors.bg = bg
+    colors.bg_dark = transparent and colors.none or bg_dark
+    colors.bg_float = transparent and colors.none or bg_dark
+    colors.bg_sidebar = transparent and colors.none or bg_dark
+    colors.bg_statusline = transparent and colors.none or util
+  end,
   on_highlights = function(hl, c)
-    local midnightBlue = '#1F202E'
-    local nightfallBlue = '#292B3D'
+    -- local midnightBlue = '#111118'
+    local nightfallBlue = '#1f202e'
 
     hl.Pmenu = { fg = c.none }
     hl.PmenuSel = { bg = nightfallBlue}
@@ -18,6 +30,8 @@ require('tokyonight').setup({
     hl.HarpoonBorder = { fg = nightfallBlue }
     hl.TelescopeSelection = { bg = nightfallBlue }
     hl.TelescopePromptPrefix = { fg = nightfallBlue }
+    hl.TelescopePromptCounter = { fg = nightfallBlue }
+    hl.Visual = { bg = nightfallBlue }
 
     -- Configuration without transparency 
     -- hl.TelescopePromptNormal = { bg = midnightBlue }
@@ -30,13 +44,12 @@ require('tokyonight').setup({
     -- hl.TelescopePromptTitle = { fg = midnightBlue, bg = midnightBlue}
     -- hl.TelescopeResultsTitle = { fg = midnightBlue, bg = midnightBlue }
 
-
     -- Configuration with transparency 
     hl.TelescopeBorder = { fg = nightfallBlue }
     hl.TelescopePromptBorder = { fg = nightfallBlue }
     hl.TelescopePromptTitle = { fg = nightfallBlue }
     hl.TelescopeResultsTitle = { fg = nightfallBlue }
-    hl.NormalFloat = {  bg = c.none}
+    hl.NormalFloat = {  bg = c.none }
   end
 })
 
