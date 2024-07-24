@@ -51,12 +51,12 @@ return {
             '--line-number',
             '--column',
             '--smart-case',
-            '--hidden', -- Include hidden files
           },
         },
         pickers = {
           find_files = {
-            file_ignore_patterns = { '^.git/' }, -- Ensure we always ignore the .git directory   hidden = true, -- Include hidden files when searching for files
+            file_ignore_patterns = { '^.git/', 'node_modules/' },  -- Ensure we always ignore the .git and node_modules directories
+            hidden = false,
           },
           buffers = {
             mappings = {
@@ -70,6 +70,10 @@ return {
           },
         },
         extensions = {
+          file_browser = {
+            hidden = true,
+            respect_gitignore = true, -- I adding/removing this, nothing happens
+          },
           ['ui-select'] = {
             require('telescope.themes').get_dropdown(),
           },
@@ -121,6 +125,14 @@ return {
           prompt_title = 'Live Grep in Open Files',
         })
       end, { desc = '[S]earch [/] in Open Files' })
+
+      vim.keymap.set('n', '<leader>shf', function()
+        builtin.find_files({
+          hidden = true,
+          no_ignore = true,
+          prompt_title = "Search Hidden Files",
+        })
+      end, { desc = '[S]earch [H]idden Files' })
 
       -- Shortcut for searching the neovim configuration files
       vim.keymap.set('n', '<leader>sn', function()
