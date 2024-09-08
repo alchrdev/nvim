@@ -1,0 +1,182 @@
+{
+  "entertainment": {
+    "prefix": "ent",
+    "body": [
+      "---",
+      "name:",
+      "type:",
+      "category:",
+      "otherNames:",
+      "tags:",
+      "status:",
+      "rating:",
+      "chapter:",
+      "published:",
+      "public:",
+      "quotes:",
+      "lastRead:",
+      "lastUpdated:",
+      "---",
+      ""
+    ]
+  },
+  "book": {
+    "prefix": "bks",
+    "body": [
+      "---",
+      "name:",
+      "author:",
+      "type:",
+      "category:",
+      "otherNames:",
+      "genre:",
+      "status:",
+      "rating:",
+      "chapter:",
+      "published:",
+      "public:",
+      "quotes:",
+      "lastRead:",
+      "lastUpdated:",
+      "---",
+      ""
+    ]
+  },
+  "contact": {
+    "prefix": "ctc",
+    "body": [
+      "---",
+      "name:",
+      "alias:",
+      "age:",
+      "type:",
+      "birthday:",
+      "countryOfOrigin:",
+      "cityOfResidence:",
+      "street:",
+      "height:",
+      "cellphone:",
+      "phone:",
+      "meetingDate:",
+      "meetingTime:",
+      "meetingLocation:",
+      "role:",
+      "speciality:",
+      "skills:",
+      "projectsCompleted:",
+      "portfolio:",
+      "linkedin:",
+      "github:",
+      "behance:",
+      "dribbble:",
+      "---",
+      ""
+    ]
+  },
+  "character": {
+    "prefix": "chr",
+    "body": [
+      "---",
+      "name:",
+      "from:",
+      "ocuppation:",
+      "gender:",
+      "status:",
+      "birthday:",
+      "nick-name:",
+      "id:",
+      "---",
+      ""
+    ]
+  },
+  "song": {
+    "prefix": "sgs",
+    "body": [
+      "---",
+      "name:",
+      "type: song",
+      "artist:",
+      "interpreter:",
+      "source:",
+      "original:",
+      "---",
+      ""
+    ]
+  },
+  "daily": {
+    "prefix": "dly",
+    "body": [
+      "---",
+      "mood:",
+      "ubication:",
+      "climate:",
+      "bedTime:",
+      "sleepHours:",
+      "napHours:",
+      "getUp:",
+      "---",
+      "> 📓  ${CURRENT_DAY_NAME}, ${CURRENT_DATE} de ${CURRENT_MONTH_NAME} del año ${CURRENT_YEAR} a las $CURRENT_HOUR:$CURRENT_MINUTE:$CURRENT_SECOND",
+      "",
+      "## 💭 Soñé...",
+      "",
+      "",
+      "- ",
+      "## 🎯 Por hacer",
+      "",
+      "",
+      "- []",
+      "",
+      "## 📅 Acontecimientos",
+      "",
+      "- ",
+      ""
+    ]
+  },
+  "atlas": {
+    "prefix": "ats",
+    "body": [
+      "---",
+      "id: ${CURRENT_YEAR}${CURRENT_DATE}${CURRENT_HOUR}${CURRENT_MINUTE}",
+      "name:",
+      "alias: ",
+      "status: ",
+      "---",
+      ""
+    ]
+  },
+  "personl daily": {
+    "prefix": "pdaily",
+    "body": [
+      "## 📓  ${CURRENT_DAY_NAME}, ${CURRENT_DATE} de ${CURRENT_MONTH_NAME} del año ${CURRENT_YEAR} a las $CURRENT_HOUR:$CURRENT_MINUTE:$CURRENT_SECOND",
+      ""
+    ]
+  },
+  "personal": {
+    "prefix": "psn",
+    "body": ["---", "name:", "type: personal", "---", ""]
+  },
+  "code block": {
+    "prefix": "cb",
+    "body": ["```", "$1```", "$0"]
+  },
+  "code inline": {
+    "prefix": "ci",
+    "body": ["`$1`$0"]
+  },
+  "bold": {
+    "prefix": "b",
+    "body": ["**$1**"]
+  },
+  "italic": {
+    "prefix": "i",
+    "body": ["*$1*"]
+  },
+  "callout quotation": {
+    "prefix": "caq",
+    "body": [">[!quote] $1"]
+  },
+  "date": {
+    "prefix": "dt",
+    "body": ["$CURRENT_YEAR-$CURRENT_MONTH-$CURRENT_DATE $0"]
+  }
+}
