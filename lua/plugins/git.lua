@@ -11,7 +11,7 @@ return {
           topdelete = { text = '‾' },
           changedelete = { text = '~' },
         },
-        signcolumn = true,
+        signcolumn = false,
         numhl = false,
         linehl = false,
         word_diff = false,
@@ -44,10 +44,10 @@ return {
           vim.keymap.set('n', '<leader>H', require("gitsigns").preview_hunk,
             { buffer = bufnr, desc = 'Preview git hunk '})
 
-          vim.keymap.set('n', ']h', require("gitsigns").preview_hunk,
+          vim.keymap.set('n', ']]', require("gitsigns").next_hunk,
             { buffer = bufnr, desc = 'Next git hunk '})
 
-          vim.keymap.set('n', '[h', require("gitsigns").preview_hunk,
+          vim.keymap.set('n', '[[', require("gitsigns").prev_hunk,
             { buffer = bufnr, desc = 'Previous git hunk '})
         end
       }
@@ -55,13 +55,13 @@ return {
         'n',
         '<leader>gs',
         ':Gitsigns toggle_signs<cr>',
-        { noremap = true, silent = true, desc = '[s]igns' }
+        { noremap = true, silent = true, desc = '[S]igns' }
       )
       vim.keymap.set(
         'n',
         '<leader>gl',
         ':Gitsigns toggle_current_line_blame<cr>',
-        { noremap = true, silent = true, desc = '[l]ine blame' }
+        { noremap = true, silent = true, desc = '[L]ine blame' }
       )
       vim.keymap.set(
         'n',
