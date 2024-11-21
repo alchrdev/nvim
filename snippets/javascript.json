@@ -1,0 +1,11 @@
+{
+  "JavaScript Comment Heading": {
+    "prefix": "jch",
+    "body": [
+      "//******************************",
+      "//**** ",
+      ""
+    ],
+    "description": "Comment heading js"
+  }
+}

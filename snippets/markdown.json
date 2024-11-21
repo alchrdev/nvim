@@ -3,6 +3,7 @@
     "prefix": "ent",
     "body": [
       "---",
+      "id: ${CURRENT_YEAR}${CURRENT_DATE}${CURRENT_HOUR}${CURRENT_MINUTE}",
       "name:",
       "type:",
       "category:",
@@ -24,6 +25,7 @@
     "prefix": "bks",
     "body": [
       "---",
+      "id: ${CURRENT_YEAR}${CURRENT_DATE}${CURRENT_HOUR}${CURRENT_MINUTE}",
       "name:",
       "author:",
       "type:",
@@ -43,27 +45,29 @@
     ]
   },
   "contact": {
+
     "prefix": "ctc",
     "body": [
       "---",
+      "id: ${CURRENT_YEAR}${CURRENT_DATE}${CURRENT_HOUR}${CURRENT_MINUTE}",
       "name:",
       "alias:",
       "age:",
       "type:",
       "birthday:",
-      "countryOfOrigin:",
-      "cityOfResidence:",
+      "country_of_origin:",
+      "city_of_residence:",
       "street:",
       "height:",
       "cellphone:",
       "phone:",
-      "meetingDate:",
-      "meetingTime:",
-      "meetingLocation:",
+      "meeting_date:",
+      "meeting_time:",
+      "meeting_location:",
       "role:",
       "speciality:",
       "skills:",
-      "projectsCompleted:",
+      "projects_completed:",
       "portfolio:",
       "linkedin:",
       "github:",
@@ -77,14 +81,14 @@
     "prefix": "chr",
     "body": [
       "---",
+      "id:",
       "name:",
       "from:",
       "ocuppation:",
       "gender:",
       "status:",
       "birthday:",
-      "nick-name:",
-      "id:",
+      "nick_name:",
       "---",
       ""
     ]
@@ -93,6 +97,7 @@
     "prefix": "sgs",
     "body": [
       "---",
+      "id: ${CURRENT_YEAR}${CURRENT_DATE}${CURRENT_HOUR}${CURRENT_MINUTE}",
       "name:",
       "type: song",
       "artist:",
@@ -108,21 +113,20 @@
     "body": [
       "---",
       "mood:",
-      "ubication:",
-      "climate:",
-      "bedTime:",
-      "sleepHours:",
-      "napHours:",
-      "getUp:",
+      "location:",
+      "weather:",
+      "bed_time:",
+      "sleep_hours:",
+      "nap_hours:",
+      "get_up:",
       "---",
-      "> 📓  ${CURRENT_DAY_NAME}, ${CURRENT_DATE} de ${CURRENT_MONTH_NAME} del año ${CURRENT_YEAR} a las $CURRENT_HOUR:$CURRENT_MINUTE:$CURRENT_SECOND",
+      "> 📓 ${CURRENT_DAY_NAME}, ${CURRENT_DATE} de ${CURRENT_MONTH_NAME} del año ${CURRENT_YEAR} a las $CURRENT_HOUR:$CURRENT_MINUTE:$CURRENT_SECOND",
       "",
       "## 💭 Soñé...",
       "",
-      "",
       "- ",
-      "## 🎯 Por hacer",
       "",
+      "## 🎯 Por hacer",
       "",
       "- []",
       "",
@@ -138,7 +142,8 @@
       "---",
       "id: ${CURRENT_YEAR}${CURRENT_DATE}${CURRENT_HOUR}${CURRENT_MINUTE}",
       "name:",
-      "alias: ",
+      "aliases:",
+      "  - ",
       "status: ",
       "---",
       ""
@@ -147,13 +152,19 @@
   "personl daily": {
     "prefix": "pdaily",
     "body": [
-      "## 📓  ${CURRENT_DAY_NAME}, ${CURRENT_DATE} de ${CURRENT_MONTH_NAME} del año ${CURRENT_YEAR} a las $CURRENT_HOUR:$CURRENT_MINUTE:$CURRENT_SECOND",
+      "## 📓 ${CURRENT_DAY_NAME}, ${CURRENT_DATE} de ${CURRENT_MONTH_NAME} del año ${CURRENT_YEAR} a las $CURRENT_HOUR:$CURRENT_MINUTE:$CURRENT_SECOND",
       ""
     ]
   },
   "personal": {
     "prefix": "psn",
-    "body": ["---", "name:", "type: personal", "---", ""]
+    "body": [
+      "---",
+      "id: ${CURRENT_YEAR}${CURRENT_DATE}${CURRENT_HOUR}${CURRENT_MINUTE}",
+      "name:",
+      "type: personal",
+      "---", 
+      ""]
   },
   "code block": {
     "prefix": "cb",
@@ -169,11 +180,55 @@
   },
   "italic": {
     "prefix": "i",
-    "body": ["*$1*"]
+    "body": ["_$1_"]
   },
-  "callout quotation": {
-    "prefix": "caq",
+  "quotation": {
+    "prefix": "cbc",
     "body": [">[!quote] $1"]
+  },
+  "note": {
+    "prefix": "cbn",
+    "body": [">[!note] $1"]
+  },
+  "success": {
+    "prefix": "cbs",
+    "body": [">[!success] $1"]
+  },
+  "warning": {
+    "prefix": "cbw",
+    "body": [">[!warning] $1"]
+  },
+  "tip": {
+    "prefix": "cbt",
+    "body": [">[!tip] $1"]
+  },
+  "failure": {
+    "prefix": "cbf",
+    "body": [">[!failure] $1"]
+  },
+  "danger": {
+    "prefix": "cbd",
+    "body": [">[!danger] $1"]
+  },
+  "todo": {
+    "prefix": "cbt",
+    "body": [">[!todo] $1"]
+  },
+  "question": {
+    "prefix": "cbq",
+    "body": [">[!question] $1"]
+  },
+  "info": {
+    "prefix": "cbi",
+    "body": [">[!info] $1"]
+  },
+  "bug": {
+    "prefix": "cbb",
+    "body": [">[!bug] $1"]
+  },
+  "error": {
+    "prefix": "cbe",
+    "body": [">[!error] $1"]
   },
   "date": {
     "prefix": "dt",

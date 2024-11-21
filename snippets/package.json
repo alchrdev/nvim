@@ -9,6 +9,10 @@
             {
                 "language": ["css"],
                 "path": "./css.json"
+            },
+            {
+                "language": ["javascript"],
+                "path": "./javascript.json"
             }
         ]
     }
