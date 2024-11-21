@@ -65,6 +65,7 @@ return {
           -- MiniStatuslineDevinfo = { bg = '#1a1824'},
 
           -- When transparency is enabled, only foreground colors are applied. 
+          FloatBorder = { fg = '#463e59' },
           TelescopeBorder = { fg = '#121212' },
           TelescopeSelection  = { bg = '#261f2d' },
           TelescopePreviewTitle = { fg = '#463e59' },
