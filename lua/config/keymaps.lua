@@ -2,9 +2,7 @@
 --  See `:help vim.keymap.set()`
 local opts = { noremap = true, silent = true }
 
-
 vim.g.mapleader = ' '
-vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 
 -- Diagnostic keymaps
@@ -75,6 +73,7 @@ vim.keymap.set('n', 'X', ':keeppatterns substitute/\\s*\\%#\\s*/\\r/e <bar> norm
 -- Window split commands
 vim.keymap.set('n', '<leader>-', '<C-W>v', { desc = 'Split window vertically' })
 vim.keymap.set('n', '<leader>|', '<C-W>s', { desc = 'Split window horizontally' })
+vim.keymap.set('n', '<leader>x', '<C-w>c', { desc = 'Close current split' })
 
 -- Buffers
 vim.keymap.set('n', '<Right>', '<cmd>bprevious<cr>', { desc = 'Prev buffer' })
