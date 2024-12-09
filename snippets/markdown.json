@@ -7,7 +7,7 @@
       "name:",
       "type:",
       "category:",
-      "otherNames:",
+      "other_names:",
       "tags:",
       "status:",
       "rating:",
@@ -15,8 +15,8 @@
       "published:",
       "public:",
       "quotes:",
-      "lastRead:",
-      "lastUpdated:",
+      "last_read:",
+      "last_updated:",
       "---",
       ""
     ]
@@ -30,7 +30,7 @@
       "author:",
       "type:",
       "category:",
-      "otherNames:",
+      "other_names:",
       "genre:",
       "status:",
       "rating:",
@@ -38,14 +38,13 @@
       "published:",
       "public:",
       "quotes:",
-      "lastRead:",
-      "lastUpdated:",
+      "last_read:",
+      "last_updated:",
       "---",
       ""
     ]
   },
   "contact": {
-
     "prefix": "ctc",
     "body": [
       "---",
@@ -84,7 +83,7 @@
       "id:",
       "name:",
       "from:",
-      "ocuppation:",
+      "occupation:",
       "gender:",
       "status:",
       "birthday:",
@@ -121,15 +120,30 @@
       "get_up:",
       "---",
       "> 📓 ${CURRENT_DAY_NAME}, ${CURRENT_DATE} de ${CURRENT_MONTH_NAME} del año ${CURRENT_YEAR} a las $CURRENT_HOUR:$CURRENT_MINUTE:$CURRENT_SECOND",
-      "",
+      ""
+    ]
+  },
+  "dream": {
+    "prefix": "drm",
+    "body": [
       "## 💭 Soñé...",
       "",
       "- ",
-      "",
+      ""
+    ]
+  },
+  "ToDo": {
+    "prefix": "td",
+    "body": [
       "## 🎯 Por hacer",
       "",
       "- []",
-      "",
+      ""
+    ]
+  },
+  "events": {
+    "prefix": "evt",
+    "body": [
       "## 📅 Acontecimientos",
       "",
       "- ",
@@ -163,8 +177,9 @@
       "id: ${CURRENT_YEAR}${CURRENT_DATE}${CURRENT_HOUR}${CURRENT_MINUTE}",
       "name:",
       "type: personal",
-      "---", 
-      ""]
+      "---",
+      ""
+    ]
   },
   "code block": {
     "prefix": "cb",
