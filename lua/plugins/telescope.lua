@@ -97,11 +97,21 @@ return {
         })
       end, { desc = '[S]earch File [B]rowser (root)' })
 
+      vim.keymap.set('n', '<leader>sE', function()
+        require('telescope').extensions.file_browser.file_browser({
+          prompt_title = "Search File Browser Hidden (Buffer)",
+          select_buffer = false,
+          hidden = true,
+          respect_gitignore = false,
+        })
+      end, { desc = '[S]earch File [B]rowser [H]idden (root)' })
+
       vim.keymap.set('n', '<leader>sb', function()
         require('telescope').extensions.file_browser.file_browser({
           path = vim.fn.expand('%:p:h'),
           select_buffer = true,
           prompt_title = "Search File Browser (Buffer)",
+          file_ignore_patterns = { ".git/" },
         })
       end, { desc = '[S]earch File [B]rowser (buffer)' })
 
@@ -135,9 +145,17 @@ return {
         builtin.find_files({
           hidden = true,
           no_ignore = true,
-          prompt_title = "Search Hidden Files",
+          prompt_title = 'Search Hidden Files',
         })
       end, { desc = '[S]earch [H]idden Files' })
+
+      vim.keymap.set('n', '<leader>sI', function()
+        builtin.live_grep({
+          additional_args = function()
+            return { '--no-ignore' }
+          end,
+        })
+      end, { desc = '[S]earch by [G]rep (Including .gitignore)' })
 
       -- Shortcut for searching the neovim configuration files
       vim.keymap.set('n', '<leader>sn', function()
