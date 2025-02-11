@@ -1,4 +1,3 @@
-
 return {
   { -- Fuzzy Finder (files, lsp, etc)
     'nvim-telescope/telescope.nvim',
@@ -8,17 +7,15 @@ return {
       'nvim-lua/plenary.nvim',
 
       -- Better search
-      {
-        'nvim-telescope/telescope-fzf-native.nvim',
-        build = 'make',
-        cond = function()
-          return vim.fn.executable('make') == 1
-        end,
-      },
-      { 'nvim-telescope/telescope-ui-select.nvim' },
+      -- {
+      --   'nvim-telescope/telescope-fzf-native.nvim',
+      --   build = 'make',
+      --   cond = function()
+      --     return vim.fn.executable('make') == 1
+      --   end,
+      -- },
 
-      -- Pretty icons
-      { 'nvim-tree/nvim-web-devicons' },
+      { 'nvim-telescope/telescope-ui-select.nvim' },
 
       -- File browser
       'nvim-telescope/telescope-file-browser.nvim',
@@ -34,13 +31,14 @@ return {
               ['q'] = actions.close,
             },
           },
-          prompt_prefix = ' ' .. icons.ui.Telescope .. '   ',
-          selection_caret = icons.ui.TriangleShortArrowRight.. ' ',
+          theme = 'ivy',
+          prompt_prefix = ' ' .. icons.ui.ChevronShortRight.. '   ',
+          layout_strategy = "center",
           layout_config = {
             horizontal = {
-              width = 0.90,
-              height = 0.90,
-              preview_width = 0.5,
+              width = 0.5,
+              height = 0.4,
+              prompt_position = 'top'
             },
           },
           -- We override the ripgrep arguments to include hidden files and ignore files in .git directory
@@ -53,22 +51,8 @@ return {
             '--column',
             '--smart-case',
           },
-        },
-        pickers = {
-          find_files = {
-            file_ignore_patterns = { '^.git/', 'node_modules/' },  -- Ensure we always ignore the .git and node_modules directories
-            hidden = false,
-          },
-          buffers = {
-            mappings = {
-              i = {
-                ['<c-d>'] = actions.delete_buffer,
-              },
-              n = {
-                ['<c-d>'] = actions.delete_buffer,
-              },
-            },
-          },
+          preview = false,
+          sorting_strategy = "ascending",
         },
         extensions = {
           file_browser = {
@@ -91,77 +75,34 @@ return {
       -- See `:help telescope.builtin`
       local builtin = require('telescope.builtin')
 
-      vim.keymap.set('n', '<leader>se', function()
+      vim.keymap.set('n', '<leader>er', function()
         require('telescope').extensions.file_browser.file_browser({
-          prompt_title = "Search File Browser (Root)",
+          path = vim.fn.getcwd(),
+          prompt_title = "File Explorer (Root)",
+          hidden = false,
+          respect_gitignore = true,
         })
-      end, { desc = '[S]earch File [B]rowser (root)' })
+      end, { desc = 'File Explorer at the Root' })
 
-      vim.keymap.set('n', '<leader>sE', function()
+      vim.keymap.set('n', '<leader>eb', function()
         require('telescope').extensions.file_browser.file_browser({
-          prompt_title = "Search File Browser Hidden (Buffer)",
-          select_buffer = false,
+          path = vim.fn.expand('%:p:h'),
+          prompt_title = "File Explorer (Current Buffer)",
+          hidden = false,
+          respect_gitignore = true,
+        })
+      end, { desc = 'File Explorer in the Current Buffer' })
+
+      vim.keymap.set('n', '<leader>ea', function()
+        require('telescope').extensions.file_browser.file_browser({
+          path = vim.fn.getcwd(),
+          prompt_title = "File Explorer (All Files)",
           hidden = true,
           respect_gitignore = false,
         })
-      end, { desc = '[S]earch File [B]rowser [H]idden (root)' })
+      end, { desc = 'File Explorer with Hidden Files' })
 
-      vim.keymap.set('n', '<leader>sb', function()
-        require('telescope').extensions.file_browser.file_browser({
-          path = vim.fn.expand('%:p:h'),
-          select_buffer = true,
-          prompt_title = "Search File Browser (Buffer)",
-          file_ignore_patterns = { ".git/" },
-        })
-      end, { desc = '[S]earch File [B]rowser (buffer)' })
-
-
-      vim.keymap.set('n', '<leader>sh', builtin.help_tags, { desc = '[S]earch [H]elp' })
-      vim.keymap.set('n', '<leader>sk', builtin.keymaps, { desc = '[S]earch [K]eymaps' })
-      vim.keymap.set('n', '<leader>sf', builtin.find_files, { desc = '[S]earch [F]iles' })
-      vim.keymap.set('n', '<leader>sp', builtin.builtin, { desc = '[S]earch [A]ll [P]ickers' })
-      vim.keymap.set('n', '<leader>sw', builtin.grep_string, { desc = '[S]earch current [W]ord' })
-      vim.keymap.set('n', '<leader>sg', builtin.live_grep, { desc = '[S]earch by [G]rep' })
-      vim.keymap.set('n', '<leader>sd', builtin.diagnostics, { desc = '[S]earch [D]iagnostics' })
       vim.keymap.set('n', '<leader>sr', builtin.resume, { desc = '[S]earch [R]esume' })
-      vim.keymap.set('n', '<leader>.', builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
-      vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
-
-      vim.keymap.set(
-        'n',
-        '<leader>/',
-        builtin.current_buffer_fuzzy_find,
-        { desc = '[/] Fuzzily search in current buffer' }
-      )
-
-      vim.keymap.set('n', '<leader>s/', function()
-        builtin.live_grep({
-          grep_open_files = true,
-          prompt_title = 'Live Grep in Open Files',
-        })
-      end, { desc = '[S]earch [/] in Open Files' })
-
-      vim.keymap.set('n', '<leader>si', function()
-        builtin.find_files({
-          hidden = true,
-          no_ignore = true,
-          prompt_title = 'Search Hidden Files',
-        })
-      end, { desc = '[S]earch [H]idden Files' })
-
-      vim.keymap.set('n', '<leader>sI', function()
-        builtin.live_grep({
-          additional_args = function()
-            return { '--no-ignore' }
-          end,
-        })
-      end, { desc = '[S]earch by [G]rep (Including .gitignore)' })
-
-      -- Shortcut for searching the neovim configuration files
-      vim.keymap.set('n', '<leader>sn', function()
-        builtin.find_files({ cwd = vim.fn.stdpath('config') })
-      end, { desc = '[S]earch [N]eovim files' })
-
       vim.keymap.set('n', '<leader>ss', function()
         require('telescope.builtin').spell_suggest(require('telescope.themes').get_cursor({}))
       end, { desc = '[S]earch [S]pelling suggestions' })
