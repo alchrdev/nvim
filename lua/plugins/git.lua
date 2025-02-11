@@ -53,7 +53,7 @@ return {
       }
       vim.keymap.set(
         'n',
-        '<leader>gs',
+        '<leader>gt',
         ':Gitsigns toggle_signs<cr>',
         { noremap = true, silent = true, desc = '[S]igns' }
       )
