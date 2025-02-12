@@ -17,6 +17,10 @@
       "quotes:",
       "last_read:",
       "last_updated:",
+      "write:",
+      "art:",
+      "original_work:",
+      "protagonist_name:",
       "---",
       ""
     ]
@@ -107,22 +111,6 @@
       ""
     ]
   },
-  "daily": {
-    "prefix": "dly",
-    "body": [
-      "---",
-      "mood:",
-      "location:",
-      "weather:",
-      "bed_time:",
-      "sleep_hours:",
-      "nap_hours:",
-      "get_up:",
-      "---",
-      "> 📓 ${CURRENT_DAY_NAME}, ${CURRENT_DATE} de ${CURRENT_MONTH_NAME} del año ${CURRENT_YEAR} a las $CURRENT_HOUR:$CURRENT_MINUTE:$CURRENT_SECOND",
-      ""
-    ]
-  },
   "dream": {
     "prefix": "drm",
     "body": [
@@ -163,7 +151,7 @@
       ""
     ]
   },
-  "personl daily": {
+  "personal daily": {
     "prefix": "pdaily",
     "body": [
       "## 📓 ${CURRENT_DAY_NAME}, ${CURRENT_DATE} de ${CURRENT_MONTH_NAME} del año ${CURRENT_YEAR} a las $CURRENT_HOUR:$CURRENT_MINUTE:$CURRENT_SECOND",
@@ -193,7 +181,7 @@
     "prefix": "b",
     "body": ["**$1**"]
   },
-  "italic": {
+  "i": {
     "prefix": "i",
     "body": ["_$1_"]
   },
@@ -226,7 +214,7 @@
     "body": [">[!danger] $1"]
   },
   "todo": {
-    "prefix": "cbt",
+    "prefix": "cbo",
     "body": [">[!todo] $1"]
   },
   "question": {
