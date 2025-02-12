@@ -66,17 +66,26 @@ return {
 
           -- When transparency is enabled, only foreground colors are applied. 
           FloatBorder = { fg = '#463e59' },
+          FloatTitle = { fg = '#463e59' },
+
+          SnacksInputBorder = { fg = '#463e59' },
+          SnacksInputTitle = { fg = '#463e59' },
+          SnacksInputPrompt = { fg = '#463e59' },
+          SnacksInputIcon = { fg = '#463e59' },
+          SnacksPickerIcon = { fg = '#463e59' },
+          SnacksPickerPrompt = { fg = '#463e59'},
+
           TelescopeBorder = { fg = '#121212' },
-          TelescopeSelection  = { bg = '#261f2d' },
+          TelescopeSelection  = { bg = '#1d1923' },
           TelescopePreviewTitle = { fg = '#463e59' },
           TelescopePromptTitle = { fg = '#463e59' },
           TelescopeResultsTitle = { fg = '#463e59' },
           TelescopePromptPrefix = { fg = '#463e59' },
-          TelescopeSelectionCaret = { bg = '#4d4763', fg = '#4d4763' },
+          TelescopeSelectionCaret = { bg = '#1d1923', fg = '#1d1923' },
           TelescopePromptCounter = { fg = '#524360' },
-          RenderMarkdownCode = { bg = '#0d0d0d' },
-          RenderMarkdownCodeInline = { bg = '#0d0d0d' },
-          RenderMarkdownDash = { fg = '#121212'},
+
+          RenderMarkdownDash = { fg = '#463e59'},
+
           MiniStatuslineFilename = { bg= 'NONE' },
           MiniStatuslineFileinfo = { bg = 'NONE' },
           MiniStatuslineMode = { bg = 'NONE' },
