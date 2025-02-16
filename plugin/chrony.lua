@@ -76,4 +76,4 @@ local function update_chapter_and_date()
   vim.notify("Chapter updated! " .. updated_field .. " field updated.")
 end
 
-vim.keymap.set('n', '<leader>uc', update_chapter_and_date, { desc = '[U]pdate [C]hapter and date' })
+vim.keymap.set('n', '<leader>un', update_chapter_and_date, { desc = '[U]pdate [N]ew chapter and date' })
