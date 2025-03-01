@@ -9,7 +9,21 @@ return {
     config = function()
       require('render-markdown').setup({
         heading = { enabled = false },
-        code = { enabled = false },
+        code = {
+            enabled = true,
+            render_modes = false,
+            sign = true,
+            style = 'language',
+            language_pad = 0,
+            language_name = true,
+            disable_background = { 'diff' },
+            left_margin = 0,
+            left_pad = 0,
+            right_pad = 0,
+            min_width = 0,
+            border = 'none',
+            inline_pad = 0,
+        },
         callout = {
           note = { raw = '[!NOTE]', rendered = '  Note', highlight = 'RenderMarkdownInfo' },
           tip = { raw = '[!TIP]', rendered = ' Tip', highlight = 'RenderMarkdownSuccess' },
