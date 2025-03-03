@@ -11,6 +11,7 @@ local function update_chapter_and_date()
   local yaml_start, yaml_end = nil, nil
   local updated_field = nil
 
+  -- Detect YAML frontmatter boundaries
   for i, line in ipairs(lines) do
     if line:match("^%-%-%-$") then
       if not yaml_start then
@@ -24,9 +25,7 @@ local function update_chapter_and_date()
 
   if yaml_start and yaml_end then
     local chapter_updated = false
-    local last_read_index = nil
-    local last_watch_index = nil
-    local last_view_index = nil
+    local last_read_index, last_watch_index, last_view_index = nil, nil, nil
 
     for i = yaml_start + 1, yaml_end - 1 do
       if lines[i]:match("^chapter:") then
@@ -54,7 +53,7 @@ local function update_chapter_and_date()
       updated_field = "last_watch"
     elseif last_view_index then
       lines[last_view_index] = "last_read: " .. current_date
-      updated_field = "last_read (renamed from last_view)"
+      updated_field = "last_read (was last_view)"
     else
       table.insert(lines, yaml_start + 1, "last_read: " .. current_date)
       updated_field = "last_read"
@@ -73,7 +72,7 @@ local function update_chapter_and_date()
   end
 
   vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
-  vim.notify("Chapter updated! " .. updated_field .. " field updated.")
+  vim.notify("Chapter +1; field '" .. updated_field .. "' updated.", vim.log.levels.INFO)
 end
 
-vim.keymap.set('n', '<leader>un', update_chapter_and_date, { desc = '[U]pdate [N]ew chapter and date' })
+vim.keymap.set('n', '<leader>un', update_chapter_and_date, { desc = "[U]pdate [N]ew chapter and date" })
