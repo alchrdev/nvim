@@ -5,7 +5,47 @@ return {
   ---@type snacks.Config
   opts = {
     bigfile = { enabled = true },
-    dashboard = { enabled = true },
+    dashboard = {
+      enabled = true,
+      preset = {
+        keys = {
+          { icon = " ", key = "f", desc = "Find File", action = ":lua Snacks.dashboard.pick('files')" },
+          -- { icon = " ", key = "n", desc = "New File", action = ":ene | startinsert" },
+          -- { icon = " ", key = "g", desc = "Find Text", action = ":lua Snacks.dashboard.pick('live_grep')" },
+          { icon = " ", key = "r", desc = "Recent Files", action = ":lua Snacks.dashboard.pick('oldfiles')" },
+          { icon = " ", key = "c", desc = "Config", action = ":lua Snacks.dashboard.pick('files', {cwd = vim.fn.stdpath('config')})" },
+          -- { icon = " ", key = "s", desc = "Restore Session", section = "session" },
+          -- { icon = "󰒲 ", key = "L", desc = "Lazy", action = ":Lazy", enabled = package.loaded.lazy ~= nil },
+          { icon = " ", key = "q", desc = "Quit", action = ":qa" },
+        },
+        header = [[
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣤⣶⣶⣤⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀ ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣾⣿⣿⣿⣿⣿⣿⣦⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀ ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⣿⣿⣿⣿⣿⣿⡿⠃⠀⠀⠀⠀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀ ⠀⣸⣿⣿⣿⣿⣿⡿⠋⠀⠀⠀⣀⣴⡿⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣠⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣤⣄⣠⣤⣤⣤⣴⠖⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣤⣶⣤⣄⣴⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠓⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⢀⣴⣿⣿⣿⣏⡏⢹⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣶⣤⣤⣀⣀⣀⣀⠀
+⣄⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣿⣿⣧⣼⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠟⠋⠁⠀
+⣿⣷⣦⠀⠀⠀⠀⠀⠙⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠟⠀⢹⣿⣿⣿⣿⣿⡟⣿⣿⣿⣿⣿⣿⣿⣿⣿⣄⠀⠀⠀
+⣜⣻⣿⣷⡀⠀⠀⠀⣴⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠁⠀⠀⠈⣿⣿⣿⣿⣿⠀⠸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣄⠀
+⣿⣿⣿⣿⣷⡠⣤⠾⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠏⠀⠀⠀⠀⠀⠸⡇⢹⣿⣿⠀⠀⢹⣿⣿⣿⣿⣿⣿⣿⣿⣿⠿⠆
+⣿⣿⣿⣿⣿⣧⠤⢤⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠃⠀⠈⠓⠤⣀⠀⠀⠈⠀⢿⣿⠀⠀⠈⡿⣿⣿⣿⣿⣿⣿⣿⣿⠀⠀
+⣿⣿⣿⣿⣿⣿⡆⣼⣿⣿⡿⢹⠛⡝⣿⣿⡏⣼⠃⠀⠀⠀⠀⠀⠈⠙⠀⠀⠀⠈⠛⠀⠀⠀⠃⢻⣿⣿⣿⣿⣿⣿⣿⡀⠀
+⣿⣿⣿⣿⣿⣿⡿⠟⢻⣿⡇⠈⣉⣻⠾⡿⠀⠃⠀⣤⡶⠾⠿⣶⣄⠀⠀⠀⠀⠀⢀⠄⠲⠞⠉⢹⡟⢹⣿⣿⣿⡟⠿⠧⠀
+⣿⣻⣿⣿⣿⣿⣿⡀⠺⣿⣿⡄⢧⣼⢀⡇⠀⠀⠀⠉⠁⠀⠀⠀⠉⠀⠀⠀⠀⠀⡏⠀⣀⣀⣀⠈⠀⢸⣿⣿⣿⡇⠀⠀⠀
+⣵⣿⣿⣿⣿⣿⡿⣿⣆⣿⠿⣿⣮⡙⢿⡃⠀⢠⣦⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡷⠀⠉⠉⠹⠇⠀⣾⣿⠛⢿⣷⠀⠀⠀
+⣿⣿⣿⣿⣿⣿⡇⢻⣿⣆⢀⡿⠋⠙⢺⡇⠀⠀⣿⠉⠛⠓⠒⠤⠤⣀⣀⡀⠀⠊⠀⠉⠛⠓⠒⠒⣼⣿⠇⠀⠀⠈⠃⠀⠀
+⣿⣿⣿⣿⣿⣿⣇⣿⣿⣿⡉⠀⠀⠀⠈⣿⡄⠀⠹⣦⣼⠤⠤⠄⣀⣀⠀⠈⠉⠉⠙⠲⢶⠆⠀⣼⠗⠁⠀⠀⠀⠀⠀⠀⠀
+⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣧⠀⠀⠀⠀⣿⣻⣦⡀⠙⠣⣄⠀⠀⠀⠀⠉⠙⠒⢶⣼⣴⣯⣤⣼⣍⣀⣀⣀⣀⠀⠀⠀⠀⠀
+⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡄⠀⠀⠀⠸⣿⣿⣿⣦⣀⠈⠓⠦⣄⣀⡀⠀⢀⣠⠿⠃⣠⠞⠁⠀⠀⠀⠉⠉⠀⠀⠀⠀⠀
+⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣧⠀⠀⠀⠸⣿⣿⣿⣿⣿⣷⣦⣄⡀⠀⠉⣉⣡⠤⠖⠋⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⣿⣿⣿⣿⣿⣿⣿⣿⡟⣿⣿⣿⣧⡀⠀⠈⢿⣿⣿⣿⡟⠉⠀⠀⠉⠉⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⣿⣿⣿⣿⣿⣿⣿⣿⣹⣿⣿⣿⡿⢿⣄⠀⠈⢻⣾⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⣿⣿⣿⣿⣿⣿⡟⢻⠛⣿⣿⣿⣿⡀⠻⣷⣴⣿⣿⣿⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+]],
+      },
+    },
     explorer = { enabled = false },
     indent = { enabled = false },
     input = { enabled = true },
@@ -66,12 +106,19 @@ return {
     -- },
     -- find
     {
-      "<leader>fc",
-      function()
-        Snacks.picker.files({ cwd = vim.fn.stdpath("config") })
+      "<leader>ih",
+      function ()
+        Snacks.image.hover()
       end,
-      desc = "Find Config File",
+      desc = "Show image in floating window",
     },
+      {
+        "<leader>fc",
+        function()
+          Snacks.picker.files({ cwd = vim.fn.stdpath("config") })
+        end,
+        desc = "Find Config File",
+      },
     {
       "<leader>ff",
       function()
@@ -119,7 +166,7 @@ return {
     -- git
     {
       "<leader>gb",
-    function()
+      function()
         Snacks.picker.git_branches()
       end,
       desc = "Git Branches",
@@ -461,7 +508,7 @@ return {
     --   desc = "Lazygit",
     -- },
     {
-      "<leader>un",
+      "<leader>nh",
       function()
         Snacks.notifier.hide()
       end,
