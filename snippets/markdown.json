@@ -4,7 +4,7 @@
     "body": [
       "---",
       "id: ${CURRENT_YEAR}${CURRENT_DATE}${CURRENT_HOUR}${CURRENT_MINUTE}",
-      "name:",
+      "title:",
       "type:",
       "category:",
       "other_names:",
@@ -30,7 +30,7 @@
     "body": [
       "---",
       "id: ${CURRENT_YEAR}${CURRENT_DATE}${CURRENT_HOUR}${CURRENT_MINUTE}",
-      "name:",
+      "title:",
       "author:",
       "type:",
       "category:",
@@ -53,8 +53,8 @@
     "body": [
       "---",
       "id: ${CURRENT_YEAR}${CURRENT_DATE}${CURRENT_HOUR}${CURRENT_MINUTE}",
-      "name:",
-      "alias:",
+      "title:",
+      "aliases: []",
       "age:",
       "type:",
       "birthday:",
@@ -85,7 +85,7 @@
     "body": [
       "---",
       "id:",
-      "name:",
+      "title:",
       "from:",
       "occupation:",
       "gender:",
@@ -101,7 +101,7 @@
     "body": [
       "---",
       "id: ${CURRENT_YEAR}${CURRENT_DATE}${CURRENT_HOUR}${CURRENT_MINUTE}",
-      "name:",
+      "title:",
       "type: song",
       "artist:",
       "interpreter:",
@@ -143,9 +143,8 @@
     "body": [
       "---",
       "id: ${CURRENT_YEAR}${CURRENT_DATE}${CURRENT_HOUR}${CURRENT_MINUTE}",
-      "name:",
-      "aliases:",
-      "  - ",
+      "title:",
+      "aliases: []",
       "status: ",
       "---",
       ""
@@ -163,8 +162,10 @@
     "body": [
       "---",
       "id: ${CURRENT_YEAR}${CURRENT_DATE}${CURRENT_HOUR}${CURRENT_MINUTE}",
-      "name:",
+      "title:",
       "type: personal",
+      "aliases: []",
+      "status:",
       "---",
       ""
     ]
