@@ -15,86 +15,78 @@ return {
 
   -- theme
   {
-    'rose-pine/neovim',
-    as = 'rose-pine',
+    'folke/tokyonight.nvim',
     priority = 1000,
     config = function()
 
-      require('rose-pine').setup({
-        styles = {
-          transparency = true,
-        },
-        palette = {
-          main = {
-            -- base = '#141420', --twilight
-            -- surface = '#141420',--twilight
-            base = '#000000', --nightfall
-            surface = '#000000', --nightfall
-          },
-        },
+      require('tokyonight').setup({
+        transparent = true,
+        -- Background styles. Can be "dark", "transparent" or "normal"
+        sidebars = "transparent", -- style for sidebars, see below
+        floats = "transparent", -- style for floating windows
+        --- You can override specific highlights to use other groups or a hex color
+        --- function will be called with a Highlights and ColorScheme table
+        ---@param highlights tokyonight.Highlights
+        ---@param colors ColorScheme
+        on_highlights = function(highlights, colors)
+          highlights.Pmenu = { bg = 'NONE'}
+          highlights.PmenuThumb = { bg = 'NONE'}
+          highlights.PmenuSel = { bg = '#292b3d'}
+          highlights.PmenuSbar = { bg = 'NONE'}
+          highlights.HarpoonBorder = { fg = '#252737' }
+          highlights.Visual = { bg = '#292b3d' }
+          highlights.NormalFloat = { bg = '#1a1b26' }
+          highlights.FloatBorder = { fg = '#252737' }
+          highlights.FloatTitle = { fg = '#252737' }
 
-        highlight_groups = {
-          Pmenu =  { bg = 'NONE' },
-          PmenuThumb = { bg = 'NONE' },
-          PmenuSbar = { bg = 'NONE'},
-          PmenuSel = { bg = '#261f2d' },
-          HarpoonBorder = { fg = '#463e59' },
+          highlights.MiniStatuslineFilename = { bg = '#252737' }
+          highlights.MiniStatuslineFileinfo = { bg = '#252737' }
+          highlights.MiniStatuslineMode = { bg = 'NONE' }
 
-          -- Highlight groups adjusted for different transparency settings.
-          -- When transparency is disabled, both foreground and background colors are applied.
-          -- VertSplit = { fg = '#2a2734' },
-          -- WinSeparator = { fg = '#2a2734' },
-          -- RenderMarkdownDash = { fg = '#261f2d'},
-          -- RenderMarkdownCode = { bg = '#261f2d' },
-          -- RenderMarkdownCodeInline = { bg = '#261f2d' },
-          -- TelescopeSelection  = { bg = '#261f2d' },
-          -- TelescopePromptNormal = { bg = '#1a1824' },
-          -- TelescopeResultsNormal = { bg = '#1a1824' },
-          -- TelescopePreviewNormal = { bg = '#1a1824' },
-          -- TelescopeBorder = { bg = '#443c63' },
-          -- TelescopeResultsBorder = { bg = '#1a1824', fg = '#1a1824' },
-          -- TelescopePreviewBorder = { bg = '#1a1824', fg = '#1a1824' },
-          -- TelescopePromptBorder = { bg = '#1a1824', fg = '#1a1824' },
-          -- TelescopePromptTitle = { fg = '#1a1824', bg = '#1a1824' },
-          -- TelescopeResultsTitle = { fg = '#1a1824', bg = '#1a1824' },
-          -- TelescopePreviewTitle = { fg = '#1a1824', bg = '#1a1824' },
-          -- TelescopePromptPrefix = { fg = '#524360' },
-          -- TelescopeSelectionCaret = { bg = '#4d4763', fg = '#4d4763' },
-          -- TelescopePromptCounter = { fg = '#524360' },
-          -- MiniStatuslineFilename = { bg = '#1a1824' },
-          -- MiniStatuslineDevinfo = { bg = '#1a1824'},
+          highlights.SnacksDashboardHeader = { fg = "#4c5372" }
+          highlights.SnacksDashboardIcon = { fg = "#4c5372" }
+          highlights.SnacksDashboardDesc = { fg = "#4c5372" }
+          highlights.SnacksDashboardKey = { fg = "#4c5372" }
+          highlights.SnacksDashboardFooter = { fg = "#4c5372" }
+          highlights.SnacksDashboardSpecial = { fg = "#4c5372" }
 
-          -- When transparency is enabled, only foreground colors are applied. 
-          FloatBorder = { fg = '#463e59' },
-          FloatTitle = { fg = '#463e59' },
+          highlights.SnacksNotifierFooterInfo = { fg = '#252737' }
+          highlights.SnacksNotifierBorderInfo = { fg = '#252737' }
+          highlights.SnacksNotifierHistoryTitle = { fg = '#4c5372'}
+          highlights.SnacksNotifierTitleInfo = { fg = '#4c5372'}
+          highlights.SnacksNotifierTitleDebug = { fg = '#4c5372'}
+          highlights.SnacksNotifierIconInfo = { fg = '#4c5372'}
+          highlights.SnacksNotifierHistoryDateTime = { fg = '#4c5372'}
 
-          SnacksInputBorder = { fg = '#463e59' },
-          SnacksInputTitle = { fg = '#463e59' },
-          SnacksInputPrompt = { fg = '#463e59' },
-          SnacksInputIcon = { fg = '#463e59' },
-          SnacksPickerIcon = { fg = '#463e59' },
-          SnacksPickerPrompt = { fg = '#463e59'},
+          highlights.SnacksPicker = { bg = '#1a1b26' }
+          highlights.SnacksPickerInputBorder = { bg = 'NONE', fg = '#252737'}
+          highlights.SnacksPickerInputTitle = { bg = '#252737', fg = '#4c5372'}
+          highlights.SnacksPickerBoxTitle = { bg = '#252737', fg = '#4c5372'}
+          highlights.SnacksPickerPrompt = { fg = '#4c5372'}
 
-          TelescopeBorder = { fg = '#121212' },
-          TelescopeSelection  = { bg = '#1d1923' },
-          TelescopePreviewTitle = { fg = '#463e59' },
-          TelescopePromptTitle = { fg = '#463e59' },
-          TelescopeResultsTitle = { fg = '#463e59' },
-          TelescopePromptPrefix = { fg = '#463e59' },
-          TelescopeSelectionCaret = { bg = '#1d1923', fg = '#1d1923' },
-          TelescopePromptCounter = { fg = '#524360' },
+          highlights.SnacksInputBorder = { fg = '#252737' }
+          highlights.SnacksInputTitle = { bg = '#252737', fg = '#4c5372' }
+          highlights.SnacksInputPrompt = { fg = '#252737' }
+          highlights.SnacksInputIcon = { fg = '#4c5372' }
 
-          RenderMarkdownDash = { fg = '#463e59'},
+          highlights.TelescopeNormal = { bg = 'NONE' }
+          highlights.TelescopeBorder = { bg = 'NONE', fg = '#252737' }
+          highlights.TelescopeSelection  = { bg = '#292b3d' }
+          highlights.TelescopeSelectionCaret = { bg = '#1a1b26', fg = '#1a1b26' }
+          highlights.TelescopePreviewTitle = { bg = '#252737', fg = '#4c5372' }
+          highlights.TelescopePromptTitle = { bg = '#252737', fg = '#4c5372' }
+          highlights.TelescopeResultsTitle = { bg = '#252737', fg = '#4c5372' }
+          highlights.TelescopePromptBorder = { bg = 'NONE', fg = '#252737' }
+          highlights.TelescopePromptPrefix = { fg = '#252737' }
+          highlights.TelescopePromptCounter = { fg = '#4c5372' }
 
-          MiniStatuslineFilename = { bg= 'NONE' },
-          MiniStatuslineFileinfo = { bg = 'NONE' },
-          MiniStatuslineMode = { bg = 'NONE' },
-          VertSplit = { fg = '#121212' },
-          WinSeparator = { fg = '#121212' },
-        },
+          highlights.RenderMarkdownDash = { fg = '#252737'}
+        end,
+
+        cache = true, -- When set to true, the theme will be cached for better performance
       })
 
-      vim.api.nvim_command('colorscheme rose-pine')
+      vim.api.nvim_command('colorscheme tokyonight-night')
     end,
   },
 }
