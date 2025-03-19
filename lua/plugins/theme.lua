@@ -80,6 +80,8 @@ return {
           highlights.TelescopePromptPrefix = { fg = '#252737' }
           highlights.TelescopePromptCounter = { fg = '#4c5372' }
 
+          highlights.TroubleNormal = { bg = 'NONE' }
+
           highlights.RenderMarkdownDash = { fg = '#252737'}
         end,
 
