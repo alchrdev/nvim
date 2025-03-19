@@ -344,11 +344,12 @@ vim.api.nvim_create_user_command('BufferRemoveLine', function()
 end, {})
 
 -- Keymaps for Replace functions
-vim.keymap.set('n', '<leader>gv', function() global_replace_dynamic("value") end, { desc = "Global Value Replace" })
-vim.keymap.set('n', '<leader>gk', function() global_replace_dynamic("key") end, { desc = "Global Key Replace" })
-vim.keymap.set('n', '<leader>bv', function() buffer_replace_dynamic("value") end, { desc = "Buffer Value Replace" })
-vim.keymap.set('n', '<leader>bk', function() buffer_replace_dynamic("key") end, { desc = "Buffer Key Replace" })
+vim.keymap.set('n', '<leader>grv', function() global_replace_dynamic("value") end, { desc = "Global Value Replace" })
+vim.keymap.set('n', '<leader>grk', function() global_replace_dynamic("key") end, { desc = "Global Key Replace" })
+vim.keymap.set('n', '<leader>brv', function() buffer_replace_dynamic("value") end, { desc = "Buffer Value Replace" })
+vim.keymap.set('n', '<leader>brk', function() buffer_replace_dynamic("key") end, { desc = "Buffer Key Replace" })
 
 -- Keymaps for Remove functions (removing entire YAML lines)
-vim.keymap.set('n', '<leader>gr', function() global_remove_line() end, { desc = "Global Remove" })
-vim.keymap.set('n', '<leader>br', function() buffer_remove_line() end, { desc = "Buffer Remove" })
+vim.keymap.set('n', '<leader>grl', function() global_remove_line() end, { desc = "Global Remove" })
+vim.keymap.set('n', '<leader>brl', function() buffer_remove_line() end, { desc = "Buffer Remove" })
+
