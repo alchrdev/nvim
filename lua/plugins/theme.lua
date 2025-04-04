@@ -29,18 +29,22 @@ return {
         ---@param highlights tokyonight.Highlights
         ---@param colors ColorScheme
         on_highlights = function(highlights, colors)
+          highlights.BlinkCmpMenu = { bg = 'NONE'}
+          highlights.BlinkCmpSignatureHelp = { bg = 'NONE'}
+          highlights.BlinkCmpDoc = { bg = 'NONE'}
+          highlights.BlinkCmpDocBorder = { bg = 'NONE', fg = '#292b3d'}
           highlights.Pmenu = { bg = 'NONE'}
           highlights.PmenuThumb = { bg = 'NONE'}
           highlights.PmenuSel = { bg = '#292b3d'}
           highlights.PmenuSbar = { bg = 'NONE'}
           highlights.HarpoonBorder = { fg = '#252737' }
           highlights.Visual = { bg = '#292b3d' }
-          highlights.NormalFloat = { bg = '#1a1b26' }
+          highlights.NormalFloat = { bg = 'NONE' }
           highlights.FloatBorder = { fg = '#252737' }
           highlights.FloatTitle = { fg = '#252737' }
 
-          highlights.MiniStatuslineFilename = { bg = '#252737' }
-          highlights.MiniStatuslineFileinfo = { bg = '#252737' }
+          highlights.MiniStatuslineFilename = { bg = '#1a1b26' }
+          highlights.MiniStatuslineFileinfo = { bg = '#1a1b26' }
           highlights.MiniStatuslineMode = { bg = 'NONE' }
 
           highlights.SnacksDashboardHeader = { fg = "#4c5372" }
@@ -58,7 +62,7 @@ return {
           highlights.SnacksNotifierIconInfo = { fg = '#4c5372'}
           highlights.SnacksNotifierHistoryDateTime = { fg = '#4c5372'}
 
-          highlights.SnacksPicker = { bg = '#1a1b26' }
+          highlights.SnacksPicker = { bg = 'NONE' }
           highlights.SnacksPickerInputBorder = { bg = 'NONE', fg = '#252737'}
           highlights.SnacksPickerInputTitle = { bg = '#252737', fg = '#4c5372'}
           highlights.SnacksPickerBoxTitle = { bg = '#252737', fg = '#4c5372'}
@@ -72,7 +76,7 @@ return {
           highlights.TelescopeNormal = { bg = 'NONE' }
           highlights.TelescopeBorder = { bg = 'NONE', fg = '#252737' }
           highlights.TelescopeSelection  = { bg = '#292b3d' }
-          highlights.TelescopeSelectionCaret = { bg = '#1a1b26', fg = '#1a1b26' }
+          highlights.TelescopeSelectionCaret = { bg = 'NONE', fg = '#1a1b26' }
           highlights.TelescopePreviewTitle = { bg = '#252737', fg = '#4c5372' }
           highlights.TelescopePromptTitle = { bg = '#252737', fg = '#4c5372' }
           highlights.TelescopeResultsTitle = { bg = '#252737', fg = '#4c5372' }
