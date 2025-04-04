@@ -13,6 +13,7 @@ return {
           [']'] = { output = { left = '[', right = ']' } },
         },
       }
+      require('mini.pairs').setup()
 
       -- Simple and easy statusline.
       --  You could remove this setup call if you don't like it,
