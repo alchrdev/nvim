@@ -114,28 +114,22 @@
   "dream": {
     "prefix": "drm",
     "body": [
-      "## 💭 Soñé...",
-      "",
-      "- ",
-      ""
+      "**::dream::**",
+      "- $0 "
     ]
   },
   "ToDo": {
     "prefix": "td",
     "body": [
-      "## 🎯 Por hacer",
-      "",
-      "- []",
-      ""
+      "**::todo::**",
+      "- $0"
     ]
   },
   "events": {
     "prefix": "evt",
     "body": [
-      "## 📅 Acontecimientos",
-      "",
-      "- ",
-      ""
+      "**::events:**",
+      "- $CURRENT_HOUR:$CURRENT_MINUTE $0"
     ]
   },
   "atlas": {
@@ -177,64 +171,74 @@
     "prefix": "ci",
     "body": ["`$1`$0"]
   },
-  "bold": {
-    "prefix": "b",
-    "body": ["**$1**"]
-  },
-  "i": {
-    "prefix": "i",
-    "body": ["_$1_"]
-  },
   "quotation": {
-    "prefix": "cbc",
+    "prefix": "cac",
     "body": [">[!quote] $1"]
   },
   "note": {
-    "prefix": "cbn",
+    "prefix": "can",
     "body": [">[!note] $1"]
   },
   "success": {
-    "prefix": "cbs",
+    "prefix": "cas",
     "body": [">[!success] $1"]
   },
   "warning": {
-    "prefix": "cbw",
+    "prefix": "caw",
     "body": [">[!warning] $1"]
   },
   "tip": {
-    "prefix": "cbt",
+    "prefix": "cat",
     "body": [">[!tip] $1"]
   },
   "failure": {
-    "prefix": "cbf",
+    "prefix": "caf",
     "body": [">[!failure] $1"]
   },
   "danger": {
-    "prefix": "cbd",
+    "prefix": "cad",
     "body": [">[!danger] $1"]
   },
   "todo": {
-    "prefix": "cbo",
+    "prefix": "cat",
     "body": [">[!todo] $1"]
   },
   "question": {
-    "prefix": "cbq",
+    "prefix": "caq",
     "body": [">[!question] $1"]
   },
   "info": {
-    "prefix": "cbi",
+    "prefix": "cai",
     "body": [">[!info] $1"]
   },
   "bug": {
-    "prefix": "cbb",
+    "prefix": "cab",
     "body": [">[!bug] $1"]
   },
   "error": {
-    "prefix": "cbe",
+    "prefix": "cae",
     "body": [">[!error] $1"]
   },
   "date": {
     "prefix": "dt",
     "body": ["$CURRENT_YEAR-$CURRENT_MONTH-$CURRENT_DATE $0"]
+  },
+  "time": {
+    "prefix": "tm",
+    "body": [
+      "$CURRENT_HOUR:$CURRENT_MINUTE $0"
+    ]
+  },
+  "time_with_seconds": {
+    "prefix": "tms",
+    "body": [
+      "$CURRENT_HOUR:$CURRENT_MINUTE:$CURRENT_SECOND $0"
+    ]
+  },
+  "links": {
+    "prefix": "lk",
+    "body": [
+      "[$1]($2)$0"
+    ]
   }
 }
