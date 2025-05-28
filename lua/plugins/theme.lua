@@ -21,7 +21,6 @@ return {
 
       require('tokyonight').setup({
         transparent = true,
-        -- Background styles. Can be "dark", "transparent" or "normal"
         sidebars = "transparent", -- style for sidebars, see below
         floats = "transparent", -- style for floating windows
         --- You can override specific highlights to use other groups or a hex color
@@ -40,12 +39,25 @@ return {
           highlights.HarpoonBorder = { fg = '#252737' }
           highlights.Visual = { bg = '#292b3d' }
           highlights.NormalFloat = { bg = 'NONE' }
+          highlights.StatusLine = { bg = '#1a1b26' }
+          highlights.StatusLineNC = { bg = '#1a1b26' }
           highlights.FloatBorder = { fg = '#252737' }
           highlights.FloatTitle = { fg = '#252737' }
 
           highlights.MiniStatuslineFilename = { bg = '#1a1b26' }
-          highlights.MiniStatuslineFileinfo = { bg = '#1a1b26' }
-          highlights.MiniStatuslineMode = { bg = 'NONE' }
+
+          highlights.MiniStatuslineGitAdd = { fg = '#9ece6a', bg = 'NONE' }
+          highlights.MiniStatuslineGitChange = { fg = '#7aa2f7', bg = 'NONE' }
+          highlights.MiniStatuslineGitRemove = { fg = '#f7768e', bg = 'NONE' }
+
+          highlights.MiniStatuslineFileinfo = { fg = '#89b4fa', bg = 'NONE' }
+          highlights.MiniStatuslineLocation = { fg = '#e0af68', bg = 'NONE' }
+
+          highlights.MiniStatuslineModeNormal = { fg = '#7aa2f7', bg = 'NONE' }
+          highlights.MiniStatuslineModeVisual = { fg = '#bb9af7', bg = 'NONE' }
+          highlights.MiniStatuslineModeInsert = { fg = '#9ece6a', bg = 'NONE' }
+          highlights.MiniStatuslineModeReplace = { fg = '#f7768e', bg = 'NONE' }
+          highlights.MiniStatuslineModeCommand = { fg = '#e0af68', bg = 'NONE' }
 
           highlights.SnacksDashboardHeader = { fg = "#4c5372" }
           highlights.SnacksDashboardIcon = { fg = "#4c5372" }
