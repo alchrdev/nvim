@@ -3,10 +3,6 @@ return {
     'echasnovski/mini.nvim',
     config = function()
       -- Add/delete/replace surroundings (brackets, quotes, etc.)
-      --
-      -- - saiw) - [S]urround [A]dd [I]nner [W]ord [)]Paren
-      -- - sd'   - [S]urround [D]elete [']quotes
-      -- - sr)'  - [S]urround [R]eplace [)] [']
       require('mini.surround').setup {
         custom_surroundings = {
           [')'] = { output = { left = '(', right = ')' } },
@@ -15,61 +11,86 @@ return {
       }
       require('mini.pairs').setup()
 
-      -- Simple and easy statusline.
-      --  You could remove this setup call if you don't like it,
-      --  and try some other statusline plugin
-      local custom_fileinfo = function(args)
+      local statusline = require 'mini.statusline'
+
+      local custom_fileinfo = function()
         local filetype = vim.bo.filetype
-        -- Don't show anything if there is no filetype
-        if filetype == '' then
-          return ''
-        end
-        -- Construct output string if truncated or buffer is not normal
-        if MiniStatusline.is_truncated(args.trunc_width) or vim.bo.buftype ~= '' then
-          return filetype
-        end
-        -- Construct output string with extra file info
         local encoding = vim.bo.fileencoding or vim.bo.encoding
+        if filetype == '' then return '' end
+        -- local fileformat = vim.bo.fileformat
         return string.format('%s/%s', filetype, encoding)
       end
 
-      local statusline = require 'mini.statusline'
+      local git_status = function()
+        local gitsigns = vim.b.gitsigns_status_dict
+        if gitsigns then
+          local parts = {}
+          if gitsigns.added and gitsigns.added > 0 then
+            table.insert(parts, '%#MiniStatuslineGitAdd#+' .. gitsigns.added .. '%*')
+          end
+          if gitsigns.changed and gitsigns.changed > 0 then
+            table.insert(parts, '%#MiniStatuslineGitChange#~' .. gitsigns.changed .. '%*')
+          end
+          if gitsigns.removed and gitsigns.removed > 0 then
+            table.insert(parts, '%#MiniStatuslineGitRemove#-' .. gitsigns.removed .. '%*')
+          end
+          return table.concat(parts, ' ')
+        else
+          return ''
+        end
+      end
+
       statusline.setup {
         content = {
           active = function()
-            local mode, mode_hl = MiniStatusline.section_mode { trunc_width = 120 }
-            local location = MiniStatusline.section_location { trunc_width = 75 }
-            local fileinfo = custom_fileinfo { trunc_width = 20 }
-            local search = MiniStatusline.section_searchcount { trunc_width = 75 }
+            local mode_map = {
+              ['n'] = { 'N', 'MiniStatuslineModeNormal' },
+              ['no'] = { 'N', 'MiniStatuslineModeNormal' },
+              ['v'] = { 'V', 'MiniStatuslineModeVisual' },
+              ['V'] = { 'VL', 'MiniStatuslineModeVisual' },
+              [''] = { 'VB', 'MiniStatuslineModeVisual' },
+              ['i'] = { 'I', 'MiniStatuslineModeInsert' },
+              ['ic'] = { 'I', 'MiniStatuslineModeInsert' },
+              ['ix'] = { 'I', 'MiniStatuslineModeInsert' },
+              ['R'] = { 'R', 'MiniStatuslineModeReplace' },
+              ['Rc'] = { 'R', 'MiniStatuslineModeReplace' },
+              ['Rv'] = { 'Rv', 'MiniStatuslineModeReplace' },
+              ['c'] = { 'C', 'MiniStatuslineModeCommand' },
+              ['cv'] = { 'Ex', 'MiniStatuslineModeCommand' },
+              ['ce'] = { 'Ex', 'MiniStatuslineModeCommand' },
+              ['s'] = { 'S', 'MiniStatuslineModeVisual' },
+              ['S'] = { 'S', 'MiniStatuslineModeVisual' },
+              [''] = { 'SB', 'MiniStatuslineModeVisual' },
+              ['t'] = { 'T', 'MiniStatuslineModeNormal' },
+            }
+            local current_mode = vim.api.nvim_get_mode().mode
+            local mode_display, mode_hl = unpack(mode_map[current_mode] or { current_mode, 'MiniStatuslineModeNormal' })
+            local location = '%2l:%-2v'
+            local fileinfo = custom_fileinfo()
+            local git = git_status()
 
             return MiniStatusline.combine_groups {
-              { hl = mode_hl, strings = { mode } },
-              '%<', -- Mark general truncate point
-              { hl = 'MiniStatuslineFilename', strings = { '%.30F' } },
-              '%=', -- End left alignment
+              { hl = mode_hl, strings = { mode_display } },
+              '%<',
+              { hl = 'MiniStatuslineFilename', strings = {
+                vim.fn.expand('%:~:.')
+              }
+              },
+              '%=',
+              { strings = { git } },
               { hl = 'MiniStatuslineFileinfo', strings = { fileinfo } },
-              { hl = 'MiniStatuslineFileinfo', strings = { search, location } },
+              { hl = 'MiniStatuslineLocation', strings = { location } },
             }
           end,
           inactive = function()
-            local fileinfo = custom_fileinfo { trunc_width = 20 }
-
             return MiniStatusline.combine_groups {
-              { hl = 'MiniStatuslineFilename', strings = { filename = '%.30F' } },
-              '%=', -- End left alignment
-              { hl = 'MiniStatuslineFileinfo', strings = { fileinfo } },
+              { hl = 'MiniStatuslineFilename', strings = { vim.fn.expand('%:~:.') } },
+              '%=',
+              { hl = 'MiniStatuslineFileinfo', strings = { custom_fileinfo() } },
             }
           end,
         },
       }
-
-      -- You can configure sections in the statusline by overriding their
-      -- default behavior. For example, here we set the section for
-      -- cursor location to LINE:COLUMN
-      ---@diagnostic disable-next-line: duplicate-set-field
-      statusline.section_location = function()
-        return '%2l:%-2v'
-      end
     end,
   },
 }
