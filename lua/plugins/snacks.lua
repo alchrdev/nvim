@@ -46,7 +46,7 @@ return {
 ]],
       },
     },
-    explorer = { enabled = false },
+    explorer = { enabled = true },
     indent = { enabled = false },
     input = { enabled = true },
     notifier = {
@@ -97,13 +97,20 @@ return {
       end,
       desc = "Notification History",
     },
-    -- {
-    --   "<leader>e",
-    --   function()
-    --     Snacks.explorer()
-    --   end,
-    --   desc = "File Explorer",
-    -- },
+    {
+      "<leader>e",
+      function()
+        Snacks.explorer()
+      end,
+      desc = "File Explorer",
+    },
+    { "z=", function()
+      if vim.v.count == 0 then
+        Snacks.picker.spelling()
+      else
+        vim.cmd("normal! " .. vim.v.count .. "z=")
+      end
+    end, desc = "Spelling Suggestions" },
     -- find
     {
       "<leader>ih",
@@ -112,13 +119,13 @@ return {
       end,
       desc = "Show image in floating window",
     },
-      {
-        "<leader>fc",
-        function()
-          Snacks.picker.files({ cwd = vim.fn.stdpath("config") })
-        end,
-        desc = "Find Config File",
-      },
+    {
+      "<leader>fc",
+      function()
+        Snacks.picker.files({ cwd = vim.fn.stdpath("config") })
+      end,
+      desc = "Find Config File",
+    },
     {
       "<leader>ff",
       function()

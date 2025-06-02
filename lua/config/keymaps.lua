@@ -102,15 +102,6 @@ vim.keymap.set('n', '<C-a>', 'gg<S-v>G', { silent = true })
 vim.keymap.set('n', '<leader>es', '<cmd>setlocal spell spelllang=es<cr>', { desc = 'Spell check in Spanish'})
 vim.keymap.set('n', '<leader>en', '<cmd>setlocal spell spelllang=en<cr>', { desc = 'Spell check in English'})
 
--- Toggle spell checker on/off
-vim.keymap.set('n', '<leader>sc', function()
-  if vim.opt_local.spell then
-    vim.opt_local.spell = false
-  else
-    vim.opt_local.spell = true
-  end
-end, { desc = 'Switch spell check' })
-
 -- Toggle relative line numbers
 function ToggleRelativeLineNumber()
   if vim.wo.relativenumber == true then
