@@ -43,6 +43,8 @@ return {
           highlights.StatusLineNC = { bg = '#1a1b26' }
           highlights.FloatBorder = { fg = '#252737' }
           highlights.FloatTitle = { fg = '#252737' }
+          highlights.VertSplit = { fg = "#252737" }
+          highlights.WinSeparator = { fg = "#252737" }
 
           highlights.MiniStatuslineFilename = { bg = '#1a1b26' }
 
