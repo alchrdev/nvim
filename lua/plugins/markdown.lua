@@ -10,7 +10,7 @@ return {
       require('render-markdown').setup({
         heading = { enabled = false },
         code = {
-            enabled = true,
+            enabled = false,
             render_modes = false,
             sign = true,
             style = 'language',
