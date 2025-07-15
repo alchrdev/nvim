@@ -47,6 +47,15 @@ return {
       },
     },
     explorer = { enabled = true },
+    image = {
+      enabled = true,
+      inline = false,
+      doc = {
+        enabled = true,
+        inline = false,
+        float = false,
+      },
+    },
     indent = { enabled = false },
     input = { enabled = true },
     notifier = {
@@ -55,6 +64,36 @@ return {
     },
     picker = {
       enabled = true,
+      sources = {
+        explorer = {
+          icons = {
+            git = {
+              enabled    = true,
+              commit     = "", -- commit: reloj de reloj (git-style)
+              staged     = "", -- staged: check en caja (único y visible)
+              added      = "", -- added: plus redondeado y centrado
+              deleted    = "", -- deleted: papel con x (bastante único)
+              modified   = "", -- modified: lápiz grueso
+              renamed    = "", -- renamed: doble flecha curva (representa cambio)
+              unmerged   = "", -- unmerged: Git merge branch (muy representativo)
+              untracked  = "", -- untracked: carpeta punteada (menos ruido visual)
+              ignored    = "", -- ignored: símbolo de ghost/difuminado
+              highlights = {
+                commit     = "SnacksExplorerGitCommit",
+                staged     = "SnacksExplorerGitStaged",
+                added      = "SnacksExplorerGitAdded",
+                deleted    = "SnacksExplorerGitDeleted",
+                modified   = "SnacksExplorerGitModified",
+                renamed    = "SnacksExplorerGitRenamed",
+                unmerged   = "SnacksExplorerGitUnmerged",
+                untracked  = "SnacksExplorerGitUntracked",
+                ignored    = "SnacksExplorerGitIgnored",
+              },
+            },
+          },
+        },
+      },
+
     },
     quickfile = { enabled = true },
     scope = { enabled = true },
@@ -115,7 +154,7 @@ return {
     {
       "<leader>ih",
       function ()
-        Snacks.image.hover()
+        Snacks.image.hover({ width = 80, height = 30 })
       end,
       desc = "Show image in floating window",
     },
