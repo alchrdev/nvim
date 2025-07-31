@@ -1,17 +1,4 @@
 return {
-  -- icons
-  {
-    'nvim-tree/nvim-web-devicons',
-    config = function()
-      require('nvim-web-devicons').setup {
-        -- globally enable default icons (default to false)
-        -- will get overriden by `get_icons` option
-        default = true,
-        color_icons = true,
-        strict = true,
-      }
-    end,
-  },
   -- Theme: rose-pine-dusk
   -- A custom low-vision friendly adaptation of rose-pine
   -- Optimized for reduced eye strain and improved syntax distinction
@@ -52,7 +39,7 @@ return {
             gold = '#63829C',
             rose = '#8A4A6F',
             pine = '#7C6C8C',
-            foam = '#689D9A',
+            foam = '#689d9a',
             iris = '#8A6B91',
 
             -- Highlights
@@ -97,17 +84,18 @@ return {
           CursorWord = { fg = 'reference_text', bg = 'highlight_med', bold = false },
           CursorWord0 = { fg = 'reference_read', bg = 'git_visual_bg', bold = false },
           CursorWord1 = { fg = 'reference_write', bg = 'git_command_bg', bold = false },
-          FloatBorder = { fg = 'gold' },
-          FloatTitle = { fg = 'gold' },
+          FloatBorder = { fg = 'iris' },
+          FloatTitle = { fg = 'iris' },
           IncSearch = { bg = 'git_remove_bg', fg = 'iris' },
           NormalFloat = { bg = 'NONE' },
           Pmenu = { bg = 'NONE' },
           PmenuSbar = { bg = 'NONE' },
           PmenuThumb = { bg = 'NONE' },
-          Search = { bg = 'git_add_bg', fg = 'foam' },
+          Search = { bg = 'git_add_bg', fg = 'directory' },
           VertSplit = { fg = 'highlight_low' },
           Visual = { bg = 'highlight_med', inherit = false },
           WinSeparator = { fg = 'highlight_low' },
+          Directory = { fg = 'iris', bold = true },
 
           -- LSP highlights
           LspReferenceRead = { fg = 'reference_read', bg = 'git_visual_bg', bold = false },
@@ -124,10 +112,10 @@ return {
           GitSignsDelete = { fg = 'git_remove_color' },
           GitSignsTopDelete = { fg = 'git_remove_color' },
 
-          -- Harpoon plugin
-          HarpoonBorder = { fg = 'gold' },
+          -- ThePrimeagen/harpoon
+          HarpoonBorder = { fg = 'iris' },
 
-          -- Mini.nvim statusline
+          -- echasnovski/mini.nvim
           MiniStatuslineBranch = { fg = '#9B7D9E', bg = 'branch_bg', bold = true },
           MiniStatuslineBranchBorder = { fg = 'branch_bg', bg = 'base' },
           MiniStatuslineDevinfo = { fg = 'devinfo_text', bg = 'devinfo_bg' },
@@ -151,21 +139,21 @@ return {
           MiniStatuslineModeNormal = { fg = 'git_change_color', bg = 'git_change_bg' },
           MiniStatuslineModeReplace = { fg = 'git_remove_color', bg = 'git_remove_bg' },
           MiniStatuslineModeVisual = { fg = 'pine', bg = 'git_visual_bg' },
+          MiniIconsAzure = { fg = 'iris' },
 
-          -- Render-markdown plugin
+          -- MeanderingProgrammer/render-markdown.nvim
           RenderMarkdownCode = { bg = 'NONE' },
           RenderMarkdownCodeInline = { bg = 'NONE' },
           RenderMarkdownDash = { fg = 'highlight_low' },
 
-          -- Snacks plugin - Dashboard
-          SnacksDashboardHeader = { fg = 'gold', bold = true },
-          SnacksDashboardIcon = { fg = 'gold' },
+          -- folke/snacks.nvim
+          SnacksDashboardHeader = { fg = 'iris', bold = true },
+          SnacksDashboardIcon = { fg = 'iris' },
           SnacksDashboardKey = { fg = 'reference_text', italic = true },
           SnacksDashboardDesc = { fg = 'subtle' },
           SnacksDashboardSpecial = { fg = 'subtle' },
           SnacksDashboardFooter = { fg = 'muted' },
 
-          -- Snacks plugin - Explorer
           SnacksExplorerGitAdded = { fg = 'git_add_color' },
           SnacksExplorerGitCommit = { fg = 'reference_text' },
           SnacksExplorerGitDeleted = { fg = 'git_remove_color' },
@@ -176,29 +164,44 @@ return {
           SnacksExplorerGitUnmerged = { fg = 'iris' },
           SnacksExplorerGitUntracked = { fg = 'subtle' },
 
-          -- Snacks plugin - Input
-          SnacksInputIcon = { fg = 'gold' },
-          SnacksInputPrompt = { fg = 'gold' },
-          SnacksInputTitle = { fg = 'gold' },
+          SnacksInputIcon = { fg = 'iris' },
+          SnacksInputPrompt = { fg = 'iris' },
+          SnacksInputTitle = { fg = 'iris' },
+          SnacksInputBorder = { fg = 'iris' },
 
-          -- Snacks plugin - Picker
           SnacksPicker = { bg = 'NONE' },
-          SnacksPickerIcon = { fg = 'gold' },
-          SnacksPickerInputBorder = { bg = 'NONE', fg = 'gold' },
-          SnacksPickerPrompt = { fg = 'gold' },
+          SnacksPickerTime = { fg = 'iris' },
+          SnacksPickerIcon = { fg = 'iris' },
+          SnacksPickerInputBorder = { bg = 'NONE', fg = 'iris' },
+          SnacksPickerPrompt = { fg = 'iris' },
 
-          -- Trouble plugin
+          SnacksNotifierBorderInfo = { fg = 'iris' },
+          SnacksNotifierIconInfo = { fg = 'iris' },
+          SnacksNotifierTitleInfo = { fg = 'iris' },
+          SnacksNotifierFooterInfo = { fg = 'iris' },
+          SnacksNotifierHistoryDateTime = { fg = 'iris' },
+          SnacksNotifierHistoryTitle = { fg = 'iris' },
+
+          -- SnacksIndent = { fg = 'overlay', bg = 'NONE' }, 
+          -- SnacksIndentScope = { fg = '#707070', bg = 'NONE' }, 
+
+          -- rcarriga/nvim-notify
+          NotifyINFOTitle = { fg = 'iris'},
+          NotifyINFOBorder = { fg = 'iris' },
+          NotifyINFOBody = { fg = 'iris' },
+
+          -- folke/trouble.nvim
           TroubleNormal = { bg = 'NONE' },
           TroubleCount = { bg = 'NONE' },
 
-          -- Vim-illuminate plugin
+          -- RRethy/vim-illuminate.
           IlluminatedWordRead = { fg = 'reference_read', bg = 'git_visual_bg', bold = false },
           IlluminatedWordText = { fg = 'reference_text', bg = 'highlight_med', bold = false },
           IlluminatedWordWrite = { fg = 'reference_write', bg = 'git_command_bg', bold = false },
 
-          -- Uncomment below for snacks indent plugin
-          -- SnacksIndent = { fg = 'overlay', bg = 'NONE' }, 
-          -- SnacksIndentScope = { fg = '#707070', bg = 'NONE' }, 
+          -- nvim-treesitter 
+          ['@markup.raw.block.markdown'] = { fg = 'text' },
+          ['@markup.link.label.markdown_inline'] = { fg = 'iris'}
         },
       })
 
