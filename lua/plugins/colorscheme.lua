@@ -8,8 +8,8 @@ return {
     priority = 1000,
     config = function()
       require('rose-pine').setup({
-        variant = "main",
-        dark_variant = "main",
+        variant = 'main',
+        dark_variant = 'main',
         dim_inactive_windows = false,
         extend_background_behind_borders = true,
 
@@ -112,8 +112,11 @@ return {
           GitSignsDelete = { fg = 'git_remove_color' },
           GitSignsTopDelete = { fg = 'git_remove_color' },
 
-          -- ThePrimeagen/harpoon
-          HarpoonBorder = { fg = 'iris' },
+          -- nipply 
+          NiplyProjectName = { fg = 'iris', bold = true },
+          NiplySeparator = { fg = 'iris' },
+          NiplyMarkNumber = { fg = 'iris', bold = true },
+          NiplyMarkPath = { fg = 'text' },
 
           -- echasnovski/mini.nvim
           MiniStatuslineBranch = { fg = '#9B7D9E', bg = 'branch_bg', bold = true },
@@ -201,11 +204,11 @@ return {
 
           -- nvim-treesitter 
           ['@markup.raw.block.markdown'] = { fg = 'text' },
-          ['@markup.link.label.markdown_inline'] = { fg = 'iris'}
+          ['@markup.link.label.markdown_inline'] = { fg = 'gold' }
         },
       })
 
-      vim.api.nvim_command('colorscheme rose-pine')
+      vim.cmd('colorscheme rose-pine')
     end,
   }
 

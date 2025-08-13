@@ -2,7 +2,6 @@
 local function escape_json_lines()
   -- Get selected range or current line
   local start_line, start_col, end_line, end_col
-  
   -- Check if there's visual selection
   local mode = vim.fn.mode()
   if mode == 'v' or mode == 'V' or mode == '' then
@@ -18,14 +17,11 @@ local function escape_json_lines()
     start_col = 0
     end_col = -1
   end
-  
   -- Get lines from buffer
   local lines = vim.api.nvim_buf_get_lines(0, start_line, end_line + 1, false)
-  
   if #lines == 0 then
     return
   end
-  
   -- Process lines
   if #lines == 1 then
     -- Single line - process selection or complete line
@@ -33,20 +29,16 @@ local function escape_json_lines()
     if end_col == -1 then
       end_col = #line
     end
-    
     local before = line:sub(1, start_col)
     local selected = line:sub(start_col + 1, end_col)
     local after = line:sub(end_col + 1)
-    
     -- Escape newlines (although there shouldn't be any in a single line)
     selected = selected:gsub('\n', '\\n')
-    
     local new_line = before .. selected .. after
     vim.api.nvim_buf_set_lines(0, start_line, start_line + 1, false, {new_line})
   else
     -- Multiple lines
     local result = {}
-    
     for i, line in ipairs(lines) do
       if i == 1 then
         -- First line - from start_col to end
@@ -63,14 +55,11 @@ local function escape_json_lines()
         table.insert(result, line)
       end
     end
-    
     -- Join all lines with \n
     local escaped_text = table.concat(result, '\\n')
-    
     -- Get context from first and last line
     local first_line = lines[1]
     local last_line = lines[#lines]
-    
     local before = first_line:sub(1, start_col)
     local after = ""
     if end_col ~= -1 and #lines > 1 then
@@ -78,21 +67,17 @@ local function escape_json_lines()
     elseif #lines == 1 and end_col ~= -1 then
       after = first_line:sub(end_col + 1)
     end
-    
     -- Create new line
     local new_line = before .. escaped_text .. after
-    
     -- Replace all selected lines with single line
     vim.api.nvim_buf_set_lines(0, start_line, end_line + 1, false, {new_line})
   end
-  
   vim.notify("JSON lines escaped successfully!")
 end
 
 -- Function to unescape newlines (inverse function)
 local function unescape_json_lines()
   local start_line, start_col, end_line, end_col
-  
   -- Check if there's visual selection
   local mode = vim.fn.mode()
   if mode == 'v' or mode == 'V' or mode == '' then
@@ -106,23 +91,18 @@ local function unescape_json_lines()
     start_col = 0
     end_col = -1
   end
-  
   local lines = vim.api.nvim_buf_get_lines(0, start_line, end_line + 1, false)
-  
   if #lines == 0 then
     return
   end
-  
   -- For simplicity, process only first line if there are multiple
   local line = lines[1]
   if end_col == -1 then
     end_col = #line
   end
-  
   local before = line:sub(1, start_col)
   local selected = line:sub(start_col + 1, end_col)
   local after = line:sub(end_col + 1)
-  
   -- Unescape \n to real newlines
   local unescaped_lines = {}
   for part in selected:gmatch("([^\\n]*)\\n?") do
@@ -130,21 +110,17 @@ local function unescape_json_lines()
       table.insert(unescaped_lines, part)
     end
   end
-  
   -- If no \n found, keep original text
   if #unescaped_lines <= 1 then
     unescaped_lines = {selected}
   end
-  
   -- Add before to first element and after to last
   if #unescaped_lines > 0 then
     unescaped_lines[1] = before .. unescaped_lines[1]
     unescaped_lines[#unescaped_lines] = unescaped_lines[#unescaped_lines] .. after
   end
-  
   -- Replace line with unescaped lines
   vim.api.nvim_buf_set_lines(0, start_line, end_line + 1, false, unescaped_lines)
-  
   vim.notify("JSON lines unescaped successfully!")
 end
 

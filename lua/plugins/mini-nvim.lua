@@ -64,7 +64,7 @@ return {
               ['no'] = { 'N',  'MiniStatuslineModeNormal' },
               ['v']  = { 'V',  'MiniStatuslineModeVisual' },
               ['V']  = { 'VL', 'MiniStatuslineModeVisual' },
-              [''] = { 'VB', 'MiniStatuslineModeVisual' },
+              ['\22'] = { 'VB', 'MiniStatuslineModeVisual' },
               ['i']  = { 'I',  'MiniStatuslineModeInsert' },
               ['ic'] = { 'I',  'MiniStatuslineModeInsert' },
               ['ix'] = { 'I',  'MiniStatuslineModeInsert' },
@@ -76,7 +76,7 @@ return {
               ['ce'] = { 'Ex', 'MiniStatuslineModeCommand' },
               ['s']  = { 'S',  'MiniStatuslineModeVisual' },
               ['S']  = { 'S',  'MiniStatuslineModeVisual' },
-              [''] = { 'SB', 'MiniStatuslineModeVisual' },
+              ['\19'] = { 'SB', 'MiniStatuslineModeVisual' },
               ['t']  = { 'T',  'MiniStatuslineModeNormal' },
             }
 
@@ -101,21 +101,21 @@ return {
 
             local branch = get_git_branch()
 
-            -- Configuración de espaciado
+            -- Spacing configuration
             local spacing = {
-              between_pills = ' ', -- Espacio entre pills del lado derecho
-              after_git = '  ',    -- Espacio después de git status
+              between_pills = ' ', -- Space between right-side pills
+              after_git = '  ',    -- Space after git status
             }
 
-            -- Construir parte derecha como un solo string
+            -- Build right section as a single string
             local right_parts = {}
 
-            -- Git status (con espacio condicional)
+            -- Git status (with conditional space)
             if git ~= '' then
               table.insert(right_parts, git .. spacing.after_git)
             end
 
-            -- Pills del lado derecho (con bordes curvos restaurados)
+            -- Right-side pills (with restored curved borders)
             local pills = {
 
               -- Branch pill
@@ -134,11 +134,10 @@ return {
                 .. '%#MiniStatuslineLocationBorder#%*',
             }
 
-            -- Unir pills con el espaciado configurado
+            -- Join pills with configured spacing
             table.insert(right_parts, table.concat(pills, spacing.between_pills))
 
             local right_section = table.concat(right_parts, '')
-
 
             return MiniStatusline.combine_groups {
               {
@@ -148,20 +147,18 @@ return {
                     .. '%#MiniStatuslineModeBorder#%*',
                 }
               },
-
-
               {
-                -- Filename pill (con bordes curvos restaurados)
+                -- Filename pill (with restored curved borders)
                 strings = {
                   '%#MiniStatuslineFilenameBorder#%*'
                     .. '%#MiniStatuslineFilename#' .. filename .. '%*'
                     .. '%#MiniStatuslineFilenameBorder#%*',
                 }
               },
-              '', -- separación clara con el nombre del archivo
+              '', -- clear separation from filename
               '%=',
 
-              -- Toda la sección derecha como un solo grupo
+              -- Entire right section as a single group
               { strings = { right_section } },
             }
           end,

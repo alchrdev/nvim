@@ -1,16 +1,22 @@
 return {
-  { -- Highlight, edit, and navigate code
-    'nvim-treesitter/nvim-treesitter',
-    build = ':TSUpdate',
-    keys = {
-      { '<C-space>', desc = 'Increment selection', mode = 'x' },
-      { '<bs>', desc = 'Schrink selection', mode = 'x' },
+  {
+    "nvim-treesitter/nvim-treesitter",
+    version = false,
+    build = ":TSUpdate",
+    event = { "BufReadPost", "BufNewFile" },
+    dependencies = {
+      "nvim-treesitter/nvim-treesitter-textobjects",
     },
     config = function()
-      -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
-
-      ---@diagnostic disable-next-line: missing-fields
-      require('nvim-treesitter.configs').setup {
+      require("nvim-treesitter.configs").setup({
+        sync_install = false,
+        modules = {},
+        highlight = {
+          enable = true,
+          additional_vim_regex_highlighting = false,
+        },
+        indent = { enable = true },
+        auto_install = true,
         ensure_installed = {
           'bash',
           'comment',
@@ -37,99 +43,68 @@ return {
           'vimdoc',
           'yaml',
         },
-        -- Autoinstall languages that are not installed
-        auto_install = true,
-        highlight = { enable = true },
-        indent = { enable = true },
         incremental_selection = {
           enable = true,
           keymaps = {
-            init_selection = '<C-space>',
-            node_incremental = '<C-space>',
-            scope_incremental = '<nop>',
-            node_decremental = '<bs>',
+            init_selection = "<leader>vv",
+            node_incremental = "+",
+            scope_incremental = false,
+            node_decremental = "_",
           },
         },
-      }
-
-      -- Add some autocmds to map files to the expected syntax
-      vim.cmd [[
-        autocmd BufRead,BufNewFile *.tfstate set filetype=json
-        autocmd BufRead,BufNewFile *.yml set filetype=yaml
-        autocmd BufRead,BufNewFile yarn.lock set filetype=text
-      ]]
-    end,
-  },
-
-  {
-    'nvim-treesitter/nvim-treesitter-textobjects',
-    dependencies = { 'nvim-treesitter/nvim-treesitter' },
-    config = function()
-      require('nvim-treesitter.configs').setup {
         textobjects = {
           select = {
             enable = true,
-            -- Automatically jump forward to textobj, similar to targets.vim
             lookahead = true,
+
             keymaps = {
-              ['af'] = { query = '@function.outer', desc = 'Select outer part of a function' },
-              ['if'] = { query = '@function.inner', desc = 'Select inner part of a function' },
-              ['ac'] = { query = '@class.outer', desc = 'Select outer part of a class' },
-              ['ic'] = { query = '@class.inner', desc = 'Select inner part of a class' },
-              ['as'] = { query = '@scope', query_group = 'locals', desc = 'Select language scope' },
+              -- You can use the capture groups defined in textobjects.scm
+              ["af"] = { query = "@function.outer", desc = "around a function" },
+              ["if"] = { query = "@function.inner", desc = "inner part of a function" },
+              ["ac"] = { query = "@class.outer", desc = "around a class" },
+              ["ic"] = { query = "@class.inner", desc = "inner part of a class" },
+              ["ai"] = { query = "@conditional.outer", desc = "around an if statement" },
+              ["ii"] = { query = "@conditional.inner", desc = "inner part of an if statement" },
+              ["al"] = { query = "@loop.outer", desc = "around a loop" },
+              ["il"] = { query = "@loop.inner", desc = "inner part of a loop" },
+              ["ap"] = { query = "@parameter.outer", desc = "around parameter" },
+              ["ip"] = { query = "@parameter.inner", desc = "inside a parameter" },
             },
-            -- You can choose the select mode (default is charwise 'v')
-            --
-            -- Can also be a function which gets passed a table with the keys
-            -- * query_string: eg '@function.inner'
-            -- * method: eg 'v' or 'o'
-            -- and should return the mode ('v', 'V', or '<c-v>') or a table
-            -- mapping query_strings to modes.
             selection_modes = {
-              ['@parameter.outer'] = 'v', -- charwise
-              ['@function.outer'] = 'V', -- linewise
-              ['@class.outer'] = '<c-v>', -- blockwise
+              ["@parameter.outer"] = "v",   -- charwise
+              ["@parameter.inner"] = "v",   -- charwise
+              ["@function.outer"] = "v",    -- charwise
+              ["@conditional.outer"] = "V", -- linewise
+              ["@loop.outer"] = "V",        -- linewise
+              ["@class.outer"] = "<c-v>",   -- blockwise
+            },
+            include_surrounding_whitespace = false,
+          },
+          move = {
+            enable = true,
+            set_jumps = true, -- whether to set jumps in the jumplist
+            goto_previous_start = {
+              ["[f"] = { query = "@function.outer", desc = "Previous function" },
+              ["[c"] = { query = "@class.outer", desc = "Previous class" },
+              ["[p"] = { query = "@parameter.inner", desc = "Previous parameter" },
+            },
+            goto_next_start = {
+              ["]f"] = { query = "@function.outer", desc = "Next function" },
+              ["]c"] = { query = "@class.outer", desc = "Next class" },
+              ["]p"] = { query = "@parameter.inner", desc = "Next parameter" },
             },
           },
           swap = {
             enable = true,
             swap_next = {
-              ['<leader>csn'] = { query = '@parameter.inner', desc = 'With [N]ext Parameter' },
+              ["<leader>a"] = "@parameter.inner",
             },
             swap_previous = {
-              ['<leader>csp'] = { query = '@parameter.inner', desc = 'With [P]revious Parameter' },
-            },
-          },
-          move = {
-            enable = true,
-            set_jumps = true, -- whether to set jumps in the jumplist
-            goto_next_start = {
-              [']m'] = { query = '@function.outer', desc = 'Next function start' },
-              [']]'] = { query = '@class.outer', desc = 'Next class start' },
-              [']o'] = { query = '@loop.*', desc = 'Next loop start' },
-              [']b'] = { query = '@block.outer', desc = 'Next block start' },
-            },
-            goto_next_end = {
-              [']M'] = { query = '@function.outer', desc = 'Next function end' },
-              [']['] = { query = '@class.outer', desc = 'Next class end' },
-              [']O'] = { query = '@loop.*', desc = 'Next loop end' },
-              [']B'] = { query = '@block.outer', desc = 'Next block end' },
-            },
-            goto_previous_start = {
-              ['[m'] = { query = '@function.outer', desc = 'Previous function start' },
-              ['[['] = { query = '@class.outer', desc = 'Previous class start' },
-              ['[o'] = { query = '@loop.*', desc = 'Previous loop start' },
-              ['[b'] = { query = '@block.outer', desc = 'Previous block start' },
-            },
-            goto_previous_end = {
-              ['[M'] = { query = '@function.outer', desc = 'Previous function end' },
-              ['[]'] = { query = '@class.outer', desc = 'Previous class end' },
-              ['[O'] = { query = '@loop.*', desc = 'Previous loop end' },
-              ['[B'] = { query = '@block.outer', desc = 'Previous block end' },
+              ["<leader>A"] = "@parameter.inner",
             },
           },
         },
-      }
+      })
     end,
   },
 }

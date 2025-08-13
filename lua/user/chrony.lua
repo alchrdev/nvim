@@ -1,4 +1,4 @@
--- Increment chapter and update last read date in YAML block
+local M = {}
 
 local function get_current_date()
   return os.date("%Y-%m-%d")
@@ -11,7 +11,6 @@ local function update_chapter_and_date()
   local yaml_start, yaml_end = nil, nil
   local updated_field = nil
 
-  -- Detect YAML frontmatter boundaries
   for i, line in ipairs(lines) do
     if line:match("^%-%-%-$") then
       if not yaml_start then
@@ -75,4 +74,10 @@ local function update_chapter_and_date()
   vim.notify("Chapter +1; field '" .. updated_field .. "' updated.", vim.log.levels.INFO)
 end
 
-vim.keymap.set('n', '<leader>un', update_chapter_and_date, { desc = "[U]pdate [N]ew chapter and date" })
+function M.setup()
+  vim.keymap.set('n', '<leader>un', update_chapter_and_date, {
+    desc = "[U]pdate [N]ew chapter and date",
+  })
+end
+
+return M
