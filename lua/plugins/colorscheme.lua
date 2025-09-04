@@ -39,7 +39,7 @@ return {
             gold = '#63829C',
             rose = '#8A4A6F',
             pine = '#7C6C8C',
-            foam = '#689d9a',
+            foam = '#68789F',
             iris = '#8A6B91',
 
             -- Highlights
