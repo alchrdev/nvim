@@ -1,5 +1,5 @@
 return {
-  -- Theme: rose-pine-dusk
+  -- Theme: ashen-dusk
   -- A custom low-vision friendly adaptation of rose-pine
   -- Optimized for reduced eye strain and improved syntax distinction
   {
@@ -25,43 +25,40 @@ return {
 
           main = {
             -- Base and UI layers
-            base = '#191919',
-            surface = '#242424',
-            overlay = '#2E2E2E',
+            base = '#0D0C08',
+            surface = '#201e18',
+            overlay = '#24221b',
 
             -- Text tones
-            text = '#ABB2BF',
+            text = '#b1a999',
             subtle = '#828997',
             muted = '#5C6370',
 
             -- Syntax accents
             love = '#AA555C',
-            gold = '#63829C',
-            rose = '#8A4A6F',
+            gold = '#B28A4F',
+            rose = '#7a637e',
             pine = '#7C6C8C',
-            foam = '#68789F',
+            foam = '#5f6a8c',
             iris = '#8A6B91',
 
             -- Highlights
-            highlight_low = '#242424',
-            highlight_med = '#2A2A2A',
+            highlight_low = '#2a2821',
+            highlight_med = '#1c1a11',
             highlight_high = '#3C3C3C',
 
             -- Custom color variables for repeated hex values
             branch_bg = '#2C262F',
-            git_add_bg = '#252D2C',
-            git_change_bg = '#22282B',
-            git_remove_bg = '#2A252B',
+            git_add_bg       = '#252D2C'  , git_add_color    = '#6C8372',
+            git_change_bg    = '#22282B'  , git_change_color = '#5E7A87',
+            git_remove_bg    = '#2A252B'  , git_remove_color = '#8F5A65',
+
             git_visual_bg = '#28252A',
             git_command_bg = '#2C2723',
 
             reference_text = '#9EA2B4',
             reference_read = '#7C8A96',
             reference_write = '#8A7C59',
-
-            git_add_color = '#6C8372',
-            git_change_color = '#5E7A87',
-            git_remove_color = '#8F5A65',
 
             inactive_border = '#1A1A1A',
             inactive_text = '#707070',
@@ -75,6 +72,8 @@ return {
 
             devinfo_text = '#7A8490',
             location_text = '#7A8190',
+            title_accent = '#a59e8c',
+            subtitle_tone = '#7c7565',
           },
         },
 
@@ -84,18 +83,18 @@ return {
           CursorWord = { fg = 'reference_text', bg = 'highlight_med', bold = false },
           CursorWord0 = { fg = 'reference_read', bg = 'git_visual_bg', bold = false },
           CursorWord1 = { fg = 'reference_write', bg = 'git_command_bg', bold = false },
-          FloatBorder = { fg = 'iris' },
-          FloatTitle = { fg = 'iris' },
-          IncSearch = { bg = 'git_remove_bg', fg = 'iris' },
+          FloatBorder = { fg = 'highlight_med' },
+          FloatTitle = { fg = 'title_accent' },
           NormalFloat = { bg = 'NONE' },
+          IncSearch = { bg = 'git_remove_bg', fg = 'iris' },
           Pmenu = { bg = 'NONE' },
           PmenuSbar = { bg = 'NONE' },
           PmenuThumb = { bg = 'NONE' },
           Search = { bg = 'git_add_bg', fg = 'directory' },
-          VertSplit = { fg = 'highlight_low' },
+          VertSplit = { fg = 'highlight_med' },
           Visual = { bg = 'highlight_med', inherit = false },
           WinSeparator = { fg = 'highlight_low' },
-          Directory = { fg = 'iris', bold = true },
+          Directory = { fg = 'title_accent', bold = true },
 
           -- LSP highlights
           LspReferenceRead = { fg = 'reference_read', bg = 'git_visual_bg', bold = false },
@@ -103,46 +102,50 @@ return {
           LspReferenceWrite = { fg = 'reference_write', bg = 'git_command_bg', bold = false },
 
           -- Git-related highlights
-          GitBorderAdd = { fg = 'git_add_bg', bg = 'base' },
-          GitBorderChange = { fg = 'git_change_bg', bg = 'base' },
-          GitBorderRemove = { fg = 'git_remove_bg', bg = 'base' },
-          GitSignsAdd = { fg = 'git_add_color' },
-          GitSignsChange = { fg = 'git_change_color' },
-          GitSignsChangeDelete = { fg = 'git_change_color' },
-          GitSignsDelete = { fg = 'git_remove_color' },
-          GitSignsTopDelete = { fg = 'git_remove_color' },
+          GitBorderAdd        = { fg = 'git_add_bg',    bg = 'base' },
+          GitBorderChange     = { fg = 'git_change_bg', bg = 'base' },
+          GitBorderRemove     = { fg = 'git_remove_bg', bg = 'base' },
+
+          GitSignsAdd         = { fg = 'git_add_color' },
+          GitSignsChange      = { fg = 'git_change_color' },
+          GitSignsChangeDelete= { fg = 'git_change_color' },
+          GitSignsDelete      = { fg = 'git_remove_color' },
+          GitSignsTopDelete   = { fg = 'git_remove_color' },
 
           -- nipply 
-          NiplyProjectName = { fg = 'iris', bold = true },
-          NiplySeparator = { fg = 'iris' },
-          NiplyMarkNumber = { fg = 'iris', bold = true },
+          NiplyProjectName = { fg = 'subtitle_tone', bold = true },
+          NiplySeparator = { fg = 'highlight_med' },
+          NiplyMarkNumber = { fg = 'subtitle_tone', bold = true },
           NiplyMarkPath = { fg = 'text' },
 
           -- echasnovski/mini.nvim
-          MiniStatuslineBranch = { fg = '#9B7D9E', bg = 'branch_bg', bold = true },
-          MiniStatuslineBranchBorder = { fg = 'branch_bg', bg = 'base' },
+          MiniStatuslineBranch             = { fg = 'rose',             bg = 'branch_bg', bold = true },
+          MiniStatuslineBranchBorder       = { fg = 'branch_bg',        bg = 'base' },
+
           MiniStatuslineDevinfo = { fg = 'devinfo_text', bg = 'devinfo_bg' },
           MiniStatuslineDevinfoBorder = { fg = 'devinfo_bg', bg = 'base' },
           MiniStatuslineFileinfo = { fg = 'reference_read', bg = 'fileinfo_bg' },
           MiniStatuslineFileinfoBorder = { fg = 'fileinfo_bg', bg = 'base' },
           MiniStatuslineFilename = { fg = 'reference_text', bg = 'filename_bg' },
           MiniStatuslineFilenameBorder = { fg = 'filename_bg', bg = 'base' },
+
           MiniStatuslineGitAdd = { fg = 'git_add_color', bg = 'git_add_bg' },
           MiniStatuslineGitChange = { fg = 'git_change_color', bg = 'git_change_bg' },
           MiniStatuslineGitRemove = { fg = 'git_remove_color', bg = 'git_remove_bg' },
+
           MiniStatuslineInactiveFileinfo = { fg = 'inactive_fileinfo_text', bg = 'inactive_fileinfo_bg' },
           MiniStatuslineInactiveFileinfoBorder = { fg = 'inactive_fileinfo_bg', bg = 'base' },
           MiniStatuslineInactiveFilename = { fg = 'inactive_text', bg = 'inactive_border' },
           MiniStatuslineInactiveFilenameBorder = { fg = 'inactive_border', bg = 'base' },
           MiniStatuslineLocation = { fg = 'location_text', bg = 'location_bg' },
           MiniStatuslineLocationBorder = { fg = 'location_bg', bg = 'base' },
-          MiniStatuslineModeCommand = { fg = 'reference_write', bg = 'git_command_bg' },
+          MiniStatuslineModeCommand = { fg = 'gold', bg = 'git_command_bg' },
           MiniStatuslineModeInsert = { fg = 'git_add_color', bg = 'git_add_bg' },
           MiniStatuslineModeBorder = { fg = 'git_change_bg', bg = 'base' },
           MiniStatuslineModeNormal = { fg = 'git_change_color', bg = 'git_change_bg' },
           MiniStatuslineModeReplace = { fg = 'git_remove_color', bg = 'git_remove_bg' },
           MiniStatuslineModeVisual = { fg = 'pine', bg = 'git_visual_bg' },
-          MiniIconsAzure = { fg = 'iris' },
+          MiniIconsAzure = { fg = 'foam' },
 
           -- MeanderingProgrammer/render-markdown.nvim
           RenderMarkdownCode = { bg = 'NONE' },
@@ -150,57 +153,58 @@ return {
           RenderMarkdownDash = { fg = 'highlight_low' },
 
           -- folke/snacks.nvim
-          SnacksDashboardHeader = { fg = 'iris', bold = true },
-          SnacksDashboardIcon = { fg = 'iris' },
-          SnacksDashboardKey = { fg = 'reference_text', italic = true },
+          SnacksDashboardHeader = { fg = 'pine', bold = true },
+          SnacksDashboardIcon = { fg = 'foam' },
+          SnacksDashboardKey = { fg = 'title_accent', italic = true },
           SnacksDashboardDesc = { fg = 'subtle' },
-          SnacksDashboardSpecial = { fg = 'subtle' },
+          SnacksDashboardSpecial = { fg = 'highlight_med' },
           SnacksDashboardFooter = { fg = 'muted' },
 
-          SnacksExplorerGitAdded = { fg = 'git_add_color' },
-          SnacksExplorerGitCommit = { fg = 'reference_text' },
-          SnacksExplorerGitDeleted = { fg = 'git_remove_color' },
-          SnacksExplorerGitIgnored = { fg = 'muted' },
+          SnacksExplorerGitAdded    = { fg = 'git_add_color' },
+          SnacksExplorerGitCommit   = { fg = 'reference_text' },
+          SnacksExplorerGitDeleted  = { fg = 'git_remove_color' },
+          SnacksExplorerGitIgnored  = { fg = 'muted' },
           SnacksExplorerGitModified = { fg = 'git_change_color' },
-          SnacksExplorerGitRenamed = { fg = 'pine' },
-          SnacksExplorerGitStaged = { fg = 'git_add_color' },
+          SnacksExplorerGitRenamed  = { fg = 'pine' },
+          SnacksExplorerGitStaged   = { fg = 'git_add_color' },
           SnacksExplorerGitUnmerged = { fg = 'iris' },
-          SnacksExplorerGitUntracked = { fg = 'subtle' },
+          SnacksExplorerGitUntracked= { fg = 'subtle' },
 
           SnacksInputIcon = { fg = 'iris' },
-          SnacksInputPrompt = { fg = 'iris' },
-          SnacksInputTitle = { fg = 'iris' },
-          SnacksInputBorder = { fg = 'iris' },
+          SnacksInputPrompt = { fg = 'highlight_med' },
+          SnacksInputTitle = { fg = 'text' },
+          SnacksInputBorder = { fg = 'highlight_med' },
 
           SnacksPicker = { bg = 'NONE' },
-          SnacksPickerTime = { fg = 'iris' },
-          SnacksPickerIcon = { fg = 'iris' },
-          SnacksPickerInputBorder = { bg = 'NONE', fg = 'iris' },
-          SnacksPickerPrompt = { fg = 'iris' },
+          SnacksPickerTime = { fg = 'highlight_med' },
+          SnacksPickerIcon = { fg = 'highlight_med' },
+          SnacksPickerTotals = { fg = '#8e8572' },
+          SnacksPickerInputBorder = { bg = 'NONE', fg = 'highlight_med' },
+          SnacksPickerPrompt = { fg = 'highlight_med' },
 
-          SnacksNotifierBorderInfo = { fg = 'iris' },
-          SnacksNotifierIconInfo = { fg = 'iris' },
-          SnacksNotifierTitleInfo = { fg = 'iris' },
-          SnacksNotifierFooterInfo = { fg = 'iris' },
-          SnacksNotifierHistoryDateTime = { fg = 'iris' },
-          SnacksNotifierHistoryTitle = { fg = 'iris' },
+          SnacksNotifierBorderInfo = { fg = 'highlight_med' },
+          SnacksNotifierIconInfo = { fg = 'subtitle_tone' },
+          SnacksNotifierTitleInfo = { fg = 'subtitle_tone' },
+          SnacksNotifierFooterInfo = { fg = 'subtitle_tone' },
+          SnacksNotifierHistoryDateTime = { fg = 'subtitle_tone' },
+          SnacksNotifierHistoryTitle = { fg = 'subtitle_tone' },
 
           -- SnacksIndent = { fg = 'overlay', bg = 'NONE' }, 
           -- SnacksIndentScope = { fg = '#707070', bg = 'NONE' }, 
 
           -- rcarriga/nvim-notify
-          NotifyINFOTitle = { fg = 'iris'},
-          NotifyINFOBorder = { fg = 'iris' },
-          NotifyINFOBody = { fg = 'iris' },
+          NotifyINFOTitle = { fg = 'subtitle_tone'},
+          NotifyINFOBorder = { fg = 'subtitle_tone' },
+          NotifyINFOBody = { fg = 'subtitle_tone' },
 
           -- folke/trouble.nvim
           TroubleNormal = { bg = 'NONE' },
           TroubleCount = { bg = 'NONE' },
 
           -- RRethy/vim-illuminate.
-          IlluminatedWordRead = { fg = 'reference_read', bg = 'git_visual_bg', bold = false },
-          IlluminatedWordText = { fg = 'reference_text', bg = 'highlight_med', bold = false },
-          IlluminatedWordWrite = { fg = 'reference_write', bg = 'git_command_bg', bold = false },
+          IlluminatedWordRead = { fg = 'reference_read', bg = '#26231a', bold = false },
+          IlluminatedWordText = { fg = 'reference_text', bg = '#2d2a21', bold = false },
+          IlluminatedWordWrite = { fg = 'reference_write', bg = '#3a2a25', bold = false },
 
           -- nvim-treesitter 
           ['@markup.raw.block.markdown'] = { fg = 'text' },
