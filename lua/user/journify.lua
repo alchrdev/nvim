@@ -70,7 +70,7 @@ end
 local function open_or_create_note_for_date(date)
   _G.current_navigation_date = date
   local root_dir = vim.fn.getcwd()
-  local folder_path = root_dir .. "/apsn"
+  local folder_path = root_dir .. "/apsn/dly/"
 
   if vim.fn.isdirectory(folder_path) ~= 1 then
     vim.notify("Error: Folder 'apsn' not found in root directory", vim.log.levels.ERROR)
