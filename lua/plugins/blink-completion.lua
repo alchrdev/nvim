@@ -3,11 +3,10 @@ return {
     'L3MON4D3/LuaSnip',
     keys = {},
     version = 'v2.*',
-    build = 'make install_jsregexp',
   },
   {
     'saghen/blink.cmp',
-    dependencies = { 'rafamadriz/friendly-snippets', 'roobert/tailwindcss-colorizer-cmp.nvim' },
+    dependencies = { 'rafamadriz/friendly-snippets'  },
     version = '*',
     ---@module 'blink.cmp'
     ---@type blink.cmp.Config
