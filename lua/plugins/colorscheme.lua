@@ -44,7 +44,7 @@ return {
 
             -- Highlights
             highlight_low = '#2a2821',
-            highlight_med = '#1c1a11',
+            highlight_med = '#29252b',
             highlight_high = '#3C3C3C',
 
             -- Custom color variables for repeated hex values
@@ -72,7 +72,7 @@ return {
 
             devinfo_text = '#7A8490',
             location_text = '#7A8190',
-            title_accent = '#a59e8c',
+            title_accent = '#4d4355',
             subtitle_tone = '#7c7565',
           },
         },
