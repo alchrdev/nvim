@@ -79,15 +79,15 @@ return {
               untracked  = '', -- untracked: carpeta punteada (menos ruido visual)
               ignored    = '', -- ignored: símbolo de ghost/difuminado
               highlights = {
-                commit     = 'SnacksExplorerGitCommit',
-                staged     = 'SnacksExplorerGitStaged',
-                added      = 'SnacksExplorerGitAdded',
-                deleted    = 'SnacksExplorerGitDeleted',
-                modified   = 'SnacksExplorerGitModified',
-                renamed    = 'SnacksExplorerGitRenamed',
-                unmerged   = 'SnacksExplorerGitUnmerged',
-                untracked  = 'SnacksExplorerGitUntracked',
-                ignored    = 'SnacksExplorerGitIgnored',
+                commit    = 'SnacksExplorerGitCommit',
+                staged    = 'SnacksExplorerGitStaged',
+                added     = 'SnacksExplorerGitAdded',
+                deleted   = 'SnacksExplorerGitDeleted',
+                modified  = 'SnacksExplorerGitModified',
+                renamed   = 'SnacksExplorerGitRenamed',
+                unmerged  = 'SnacksExplorerGitUnmerged',
+                untracked = 'SnacksExplorerGitUntracked',
+                ignored   = 'SnacksExplorerGitIgnored',
               },
             },
           },
@@ -115,13 +115,17 @@ return {
       end,
       desc = 'Smart Find Files',
     },
-    { '<leader>o',
+    {
+      '<leader>o',
       function()
         Snacks.picker.buffers({
           layout = {
             preset = 'vscode',
           },
-        }) end, desc = 'Buffers' },
+        })
+      end,
+      desc = 'Buffers'
+    },
     {
       '<leader>:',
       function()
@@ -143,17 +147,21 @@ return {
       end,
       desc = 'File Explorer',
     },
-    { 'z=', function()
-      if vim.v.count == 0 then
-        Snacks.picker.spelling()
-      else
-        vim.cmd('normal! ' .. vim.v.count .. 'z=')
-      end
-    end, desc = 'Spelling Suggestions' },
+    {
+      'z=',
+      function()
+        if vim.v.count == 0 then
+          Snacks.picker.spelling()
+        else
+          vim.cmd('normal! ' .. vim.v.count .. 'z=')
+        end
+      end,
+      desc = 'Spelling Suggestions'
+    },
     -- find
     {
       '<leader>ih',
-      function ()
+      function()
         Snacks.image.hover({ width = 80, height = 30 })
       end,
       desc = 'Show image in floating window',
@@ -388,13 +396,13 @@ return {
       end,
       desc = 'Location List',
     },
-    {
-      '<leader>sm',
-      function()
-        Snacks.picker.marks()
-      end,
-      desc = 'Marks',
-    },
+    -- {
+    --   '<leader>sm',
+    --   function()
+    --     Snacks.picker.marks()
+    --   end,
+    --   desc = 'Marks',
+    -- },
     {
       '<leader>sM',
       function()

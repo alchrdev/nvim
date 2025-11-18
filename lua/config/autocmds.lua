@@ -34,4 +34,17 @@ vim.api.nvim_create_autocmd({ 'FocusGained', 'TermClose', 'TermLeave' }, { comma
 -- Resize neovim split when terminal is resized
 vim.api.nvim_command('autocmd VimResized * wincmd =')
 
-
+ vim.api.nvim_create_autocmd("DirChanged", {
+    callback = function(ev)
+      local cwd = vim.fn.getcwd()
+      if cwd:match("akt$") then
+        require("snacks").setup({
+          picker = {
+            defaults = {
+              ignore_patterns = { "_fonts/", "%.png$", "%.jpg$", "%.jpeg$", "%.webp$", "%.svg$", "%.gif$" },
+            },
+          },
+        })
+      end
+    end,
+  })

@@ -109,3 +109,5 @@ function ToggleRelativeLineNumber()
   end
 end
 vim.keymap.set('n', '<leader>ct', '<cmd>lua ToggleRelativeLineNumber()<cr>', { desc = 'Toggle relative line numbers' })
+
+vim.keymap.set('n', '<leader>at', '<cmd>AshenToggle<CR>', { desc = 'Ashen: toggle transparency' })
