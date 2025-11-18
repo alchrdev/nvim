@@ -1,43 +1,53 @@
--- Dynamic YAML frontmatter manipulation:
--- • Replace keys or values (globally or in the current buffer)
--- • Remove YAML lines containing specified terms
+local vim = vim
 
---------------------------------------------------------------------------------
--- Utility Functions
---------------------------------------------------------------------------------
+local M = {}
 
--- Function to detect if we are on Windows
-local function is_windows()
-  return vim.loop.os_uname().sysname == "Windows_NT"
+local defaults = {
+  root = vim.fn.getcwd(),
+  glob = "*.md",
+  ignore_dirs = { ".git", ".obsidian", "node_modules" },
+  commands = true,
+  keymaps = {
+    global_value = "<leader>grv",
+    global_key = "<leader>grk",
+    buffer_value = "<leader>brv",
+    buffer_key = "<leader>brk",
+    global_remove = "<leader>grl",
+    buffer_remove = "<leader>brl",
+  },
+}
+
+M.config = vim.deepcopy(defaults)
+M._commands_registered = false
+M._keymaps_registered = false
+
+local function notify(msg, level)
+  vim.notify("[MorphyML] " .. msg, level or vim.log.levels.INFO)
 end
 
--- Function to find the path to ripgrep (rg) on the system
-local function find_rg()
-  local cmd = is_windows() and "where rg" or "command -v rg"
-  local handle = io.popen(cmd)
-  if not handle then return "" end
-  local output = handle:read("*a") or ""
-  handle:close()
-  return output:gsub("%s+", "")
+local function glob_to_pattern(glob)
+  local escaped = glob:gsub("([%^%$%(%)%%%.%[%]%+%-%?])", "%%%1")
+  escaped = escaped:gsub("%*", ".*")
+  return "^" .. escaped .. "$"
 end
 
--- Function to read a file and return its lines as a table
-local function read_file_lines(filepath)
-  local f = io.open(filepath, "r")
-  if not f then return nil end
+local function read_file(path)
+  local f = io.open(path, "r")
+  if not f then
+    return nil
+  end
   local lines = {}
   for line in f:lines() do
-    table.insert(lines, line)
+    lines[#lines + 1] = line
   end
   f:close()
   return lines
 end
 
--- Function to write lines back to a file
-local function write_file_lines(filepath, lines)
-  local f = io.open(filepath, "w")
+local function write_file(path, lines)
+  local f = io.open(path, "w")
   if not f then
-    vim.notify("Error writing: " .. filepath, vim.log.levels.ERROR)
+    notify("failed to write " .. path, vim.log.levels.ERROR)
     return false
   end
   for _, line in ipairs(lines) do
@@ -47,309 +57,262 @@ local function write_file_lines(filepath, lines)
   return true
 end
 
---------------------------------------------------------------------------------
--- Dynamic YAML Replacement Function
--- Replaces text in either the key or the value, based on mode ("key" or "value")
---------------------------------------------------------------------------------
-local function replace_yaml_dynamic(lines, search_term, replacement, mode)
-  local in_yaml = false
-  local total_replacements = 0
-  -- Escape the term for literal matching
-  local search_pattern = vim.pesc(search_term)
-  for _, line in ipairs(lines) do
+local function should_ignore(path)
+  for _, dir in ipairs(M.config.ignore_dirs or {}) do
+    if path:find(dir, 1, true) then
+      return true
+    end
+  end
+  return false
+end
+
+local function list_markdown_files()
+  local root = vim.fs.normalize(M.config.root or vim.fn.getcwd())
+  local pattern = glob_to_pattern(M.config.glob or "*.md")
+  local predicate = function(name, path)
+    if should_ignore(path or "") then
+      return false
+    end
+    return name:match(pattern) ~= nil
+  end
+  return vim.fs.find(predicate, { path = root, type = "file" })
+end
+
+local function yaml_bounds(lines)
+  local start_idx, end_idx
+  for idx, line in ipairs(lines) do
     if line:match("^%s*---%s*$") then
-      in_yaml = not in_yaml
-    elseif in_yaml then
-      local prefix, value = line:match("^(%s*%S+:%s*)(.*)$")
-      if prefix and value then
-        if mode == "key" then
-          local new_prefix, count = prefix:gsub(search_pattern, replacement)
-          if count > 0 then
-            line = new_prefix .. value
-            total_replacements = total_replacements + count
-          end
-        elseif mode == "value" then
-          local new_value, count = value:gsub(search_pattern, replacement)
-          if count > 0 then
-            line = prefix .. new_value
-            total_replacements = total_replacements + count
-          end
-        else
-          vim.notify("Unsupported mode", vim.log.levels.ERROR)
-          return total_replacements
-        end
-        -- Update the line in the table
-        lines[_] = line
+      if not start_idx then
+        start_idx = idx
+      else
+        end_idx = idx
+        break
       end
     end
   end
-  return total_replacements
+  return start_idx, end_idx
 end
 
---------------------------------------------------------------------------------
--- Global Replace Dynamic Function
--- Replaces in files with YAML frontmatter based on mode ("key" or "value")
---------------------------------------------------------------------------------
-local function global_replace_dynamic(mode)
-  if mode ~= "key" and mode ~= "value" then
-    vim.notify("Unsupported mode", vim.log.levels.ERROR)
-    return
+local function replace_yaml(lines, search_term, replacement, mode)
+  local start_idx, end_idx = yaml_bounds(lines)
+  if not (start_idx and end_idx and end_idx > start_idx) then
+    return 0
   end
-
-  local search_term = vim.fn.input("Term to replace: ")
-  if search_term == "" then
-    vim.notify("Cancelled", vim.log.levels.WARN)
-    return
-  end
-
-  local replacement = vim.fn.input("Replacement: ")
-  if replacement == "" then
-    vim.notify("Cancelled", vim.log.levels.WARN)
-    return
-  end
-
-  local rg_path = find_rg()
-  if rg_path == "" then
-    vim.notify("rg not found in PATH", vim.log.levels.ERROR)
-    return
-  end
-
-  -- Pattern to allow whitespace around '---'
-  local rg_cmd = 'rg -l "^\\s*---\\s*$" --glob "*.md" --no-ignore'
-  local file_handle = io.popen(rg_cmd)
-  if not file_handle then
-    vim.notify("Search error", vim.log.levels.ERROR)
-    return
-  end
-
-  local files = {}
-  for file in file_handle:lines() do
-    table.insert(files, file)
-  end
-  file_handle:close()
-
-  if #files == 0 then
-    vim.notify("No files with YAML frontmatter found", vim.log.levels.INFO)
-    return
-  end
-
-  local updated_files = 0
-  for _, file in ipairs(files) do
-    local lines = read_file_lines(file)
-    if lines then
-      local replacements = replace_yaml_dynamic(lines, search_term, replacement, mode)
-      if replacements > 0 then
-        if write_file_lines(file, lines) then
-          vim.notify(string.format("Updated: %s (%d replacement(s))", file, replacements), vim.log.levels.INFO)
-          updated_files = updated_files + 1
+  local count = 0
+  local pattern = vim.pesc(search_term)
+  for i = start_idx + 1, end_idx - 1 do
+    local line = lines[i]
+    local key, value = line:match("^(%s*%S+:%s*)(.*)$")
+    if key and value then
+      if mode == "key" then
+        local new_key, replaced = key:gsub(pattern, replacement)
+        if replaced > 0 then
+          lines[i] = new_key .. value
+          count = count + replaced
+        end
+      elseif mode == "value" then
+        local new_value, replaced = value:gsub(pattern, replacement)
+        if replaced > 0 then
+          lines[i] = key .. new_value
+          count = count + replaced
         end
       end
-    else
-      vim.notify("Error reading: " .. file, vim.log.levels.ERROR)
     end
   end
-
-  if updated_files == 0 then
-    vim.notify("No changes made to the YAML in the files", vim.log.levels.INFO)
-  else
-    vim.notify("Global update completed successfully in " .. updated_files .. " file(s)", vim.log.levels.INFO)
-  end
-
-  vim.cmd('bufdo e')
+  return count
 end
 
---------------------------------------------------------------------------------
--- Buffer Replace Dynamic Function
--- Replaces in the current file's YAML based on mode ("key" or "value")
---------------------------------------------------------------------------------
-local function buffer_replace_dynamic(mode)
-  if mode ~= "key" and mode ~= "value" then
-    vim.notify("Unsupported mode", vim.log.levels.ERROR)
-    return
+local function remove_yaml_lines(lines, search_term)
+  local start_idx, end_idx = yaml_bounds(lines)
+  if not (start_idx and end_idx and end_idx > start_idx) then
+    return 0
   end
-
-  local search_term = vim.fn.input("Term to replace: ")
-  if search_term == "" then
-    vim.notify("Cancelled", vim.log.levels.WARN)
-    return
-  end
-
-  local replacement = vim.fn.input("Replacement: ")
-  if replacement == "" then
-    vim.notify("Cancelled", vim.log.levels.WARN)
-    return
-  end
-
-  local file_path = vim.fn.expand('%:p')
-  local file_name = vim.fn.expand('%:t')
-
-  local lines = read_file_lines(file_path)
-  if not lines then
-    vim.notify("Error in " .. file_name, vim.log.levels.ERROR)
-    return
-  end
-
-  local replacements = replace_yaml_dynamic(lines, search_term, replacement, mode)
-  if replacements > 0 then
-    if write_file_lines(file_path, lines) then
-      vim.notify(string.format("%s: '%s' → '%s' (%d)", file_name, search_term, replacement, replacements), vim.log.levels.INFO)
-    end
-  else
-    vim.notify(file_name .. ": No matches", vim.log.levels.INFO)
-  end
-
-  vim.cmd('edit!')
-end
-
---------------------------------------------------------------------------------
--- YAML Line Removal Function
--- Removes entire lines in the YAML frontmatter if they contain the specified term
---------------------------------------------------------------------------------
-local function remove_yaml_line(lines, search_term)
-  local in_yaml = false
-  local removals = 0
   local new_lines = {}
-  for _, line in ipairs(lines) do
-    if line:match("^%s*---%s*$") then
-      in_yaml = not in_yaml
+  local removed = 0
+  for idx, line in ipairs(lines) do
+    if idx <= start_idx or idx >= end_idx then
       table.insert(new_lines, line)
-    elseif in_yaml then
-      if string.find(line, search_term, 1, true) then
-        removals = removals + 1
+    else
+      if line:find(search_term, 1, true) then
+        removed = removed + 1
       else
         table.insert(new_lines, line)
       end
-    else
-      table.insert(new_lines, line)
     end
   end
-  for i = 1, #lines do lines[i] = nil end
-  for i, l in ipairs(new_lines) do
-    lines[i] = l
+  if removed > 0 then
+    for i = 1, #new_lines do
+      lines[i] = new_lines[i]
+    end
+    for i = #new_lines + 1, #lines do
+      lines[i] = nil
+    end
   end
-  return removals
+  return removed
 end
 
---------------------------------------------------------------------------------
--- Global Remove Function
--- Removes entire YAML property lines (key and value) that contain the specified term
---------------------------------------------------------------------------------
-local function global_remove_line()
-  local search_term = vim.fn.input("Term to remove: ")
-  if search_term == "" then
-    vim.notify("Cancelled", vim.log.levels.WARN)
-    return
+local function prompt(text)
+  local value = vim.fn.input(text)
+  if value == "" then
+    notify("operation cancelled", vim.log.levels.WARN)
+    return nil
   end
+  return value
+end
 
-  local rg_path = find_rg()
-  if rg_path == "" then
-    vim.notify("rg not found in PATH", vim.log.levels.ERROR)
-    return
-  end
-
-  local rg_cmd = 'rg -l "^\\s*---\\s*$" --glob "*.md" --no-ignore'
-  local file_handle = io.popen(rg_cmd)
-  if not file_handle then
-    vim.notify("Search error", vim.log.levels.ERROR)
-    return
-  end
-
-  local files = {}
-  for file in file_handle:lines() do
-    table.insert(files, file)
-  end
-  file_handle:close()
-
+local function for_each_yaml_file(callback)
+  local files = list_markdown_files()
   if #files == 0 then
-    vim.notify("No files with YAML frontmatter found", vim.log.levels.INFO)
-    return
+    notify("no markdown files found", vim.log.levels.INFO)
+    return 0
   end
-
-  local updated_files = 0
+  local updated = 0
   for _, file in ipairs(files) do
-    local lines = read_file_lines(file)
+    local lines = read_file(file)
     if lines then
-      local removals = remove_yaml_line(lines, search_term)
-      if removals > 0 then
-        if write_file_lines(file, lines) then
-          vim.notify(string.format("Updated: %s (%d removal(s))", file, removals), vim.log.levels.INFO)
-          updated_files = updated_files + 1
+      local changes = callback(lines, file)
+      if changes > 0 then
+        if write_file(file, lines) then
+          updated = updated + 1
+          notify(string.format("%s: %d change(s)", vim.fn.fnamemodify(file, ":t"), changes))
         end
       end
-    else
-      vim.notify("Error reading: " .. file, vim.log.levels.ERROR)
     end
   end
-
-  if updated_files == 0 then
-    vim.notify("No removals made in the YAML", vim.log.levels.INFO)
-  else
-    vim.notify("Global removal completed in " .. updated_files .. " file(s)", vim.log.levels.INFO)
-  end
-
-  vim.cmd('bufdo e')
+  notify(string.format("processed %d file(s)", updated))
+  return updated
 end
 
---------------------------------------------------------------------------------
--- Buffer Remove Function
--- Removes entire YAML property lines in the current file that contain the specified term
---------------------------------------------------------------------------------
-local function buffer_remove_line()
-  local search_term = vim.fn.input("Term to remove: ")
-  if search_term == "" then
-    vim.notify("Cancelled", vim.log.levels.WARN)
+local function replace_global(mode)
+  local term = prompt("Replace term: ")
+  if not term then
     return
   end
-
-  local file_path = vim.fn.expand('%:p')
-  local file_name = vim.fn.expand('%:t')
-  local lines = read_file_lines(file_path)
-  if not lines then
-    vim.notify("Error in " .. file_name, vim.log.levels.ERROR)
+  local replacement = prompt("Replacement: ")
+  if not replacement then
     return
   end
-
-  local removals = remove_yaml_line(lines, search_term)
-  if removals > 0 then
-    if write_file_lines(file_path, lines) then
-      vim.notify(string.format("%s: '%s' removed (%d)", file_name, search_term, removals), vim.log.levels.INFO)
-    end
-  else
-    vim.notify(file_name .. ": No matches", vim.log.levels.INFO)
-  end
-
-  vim.cmd('edit!')
+  for_each_yaml_file(function(lines)
+    return replace_yaml(lines, term, replacement, mode)
+  end)
 end
 
---------------------------------------------------------------------------------
--- Command and Keymap Registration
---------------------------------------------------------------------------------
+local function replace_buffer(mode)
+  local term = prompt("Replace term: ")
+  if not term then
+    return
+  end
+  local replacement = prompt("Replacement: ")
+  if not replacement then
+    return
+  end
+  local bufnr = vim.api.nvim_get_current_buf()
+  local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+  local count = replace_yaml(lines, term, replacement, mode)
+  if count > 0 then
+    vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
+    notify(string.format("%s: %d change(s)", vim.fn.bufname(bufnr), count))
+  else
+    notify("no matches in current buffer", vim.log.levels.INFO)
+  end
+end
 
-vim.api.nvim_create_user_command('GlobalReplaceDynamic', function(opts)
-  local mode = opts.args or "value"
-  global_replace_dynamic(mode)
-end, { nargs = "?" })
+local function remove_global()
+  local term = prompt("Term to remove: ")
+  if not term then
+    return
+  end
+  for_each_yaml_file(function(lines)
+    return remove_yaml_lines(lines, term)
+  end)
+end
 
-vim.api.nvim_create_user_command('BufferReplaceDynamic', function(opts)
-  local mode = opts.args or "value"
-  buffer_replace_dynamic(mode)
-end, { nargs = "?" })
+local function remove_buffer()
+  local term = prompt("Term to remove: ")
+  if not term then
+    return
+  end
+  local bufnr = vim.api.nvim_get_current_buf()
+  local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+  local count = remove_yaml_lines(lines, term)
+  if count > 0 then
+    vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
+    notify("removed " .. count .. " line(s)")
+  else
+    notify("no matches in current buffer", vim.log.levels.INFO)
+  end
+end
 
-vim.api.nvim_create_user_command('GlobalRemoveLine', function()
-  global_remove_line()
-end, {})
+M.replace_global_value = function()
+  replace_global("value")
+end
 
-vim.api.nvim_create_user_command('BufferRemoveLine', function()
-  buffer_remove_line()
-end, {})
+M.replace_global_key = function()
+  replace_global("key")
+end
 
--- Keymaps for Replace functions
-vim.keymap.set('n', '<leader>grv', function() global_replace_dynamic("value") end, { desc = "Global Value Replace" })
-vim.keymap.set('n', '<leader>grk', function() global_replace_dynamic("key") end, { desc = "Global Key Replace" })
-vim.keymap.set('n', '<leader>brv', function() buffer_replace_dynamic("value") end, { desc = "Buffer Value Replace" })
-vim.keymap.set('n', '<leader>brk', function() buffer_replace_dynamic("key") end, { desc = "Buffer Key Replace" })
+M.replace_buffer_value = function()
+  replace_buffer("value")
+end
 
--- Keymaps for Remove functions (removing entire YAML lines)
-vim.keymap.set('n', '<leader>grl', function() global_remove_line() end, { desc = "Global Remove" })
-vim.keymap.set('n', '<leader>brl', function() buffer_remove_line() end, { desc = "Buffer Remove" })
+M.replace_buffer_key = function()
+  replace_buffer("key")
+end
 
+M.remove_global = remove_global
+M.remove_buffer = remove_buffer
+
+local function register_commands()
+  if M._commands_registered or not M.config.commands then
+    return
+  end
+  vim.api.nvim_create_user_command("MorphyReplaceGlobal", function(opts)
+    local mode = opts.args == "key" and "key" or "value"
+    replace_global(mode)
+  end, { nargs = "?", complete = function()
+    return { "key", "value" }
+  end })
+  vim.api.nvim_create_user_command("MorphyReplaceBuffer", function(opts)
+    local mode = opts.args == "key" and "key" or "value"
+    replace_buffer(mode)
+  end, { nargs = "?", complete = function()
+    return { "key", "value" }
+  end })
+  vim.api.nvim_create_user_command("MorphyRemoveGlobal", remove_global, {})
+  vim.api.nvim_create_user_command("MorphyRemoveBuffer", remove_buffer, {})
+  M._commands_registered = true
+end
+
+local function register_keymaps()
+  if M._keymaps_registered or not M.config.keymaps then
+    return
+  end
+  local maps = M.config.keymaps
+  if maps.global_value then
+    vim.keymap.set("n", maps.global_value, M.replace_global_value, { desc = "Morphy: global value replace" })
+  end
+  if maps.global_key then
+    vim.keymap.set("n", maps.global_key, M.replace_global_key, { desc = "Morphy: global key replace" })
+  end
+  if maps.buffer_value then
+    vim.keymap.set("n", maps.buffer_value, M.replace_buffer_value, { desc = "Morphy: buffer value replace" })
+  end
+  if maps.buffer_key then
+    vim.keymap.set("n", maps.buffer_key, M.replace_buffer_key, { desc = "Morphy: buffer key replace" })
+  end
+  if maps.global_remove then
+    vim.keymap.set("n", maps.global_remove, M.remove_global, { desc = "Morphy: global remove line" })
+  end
+  if maps.buffer_remove then
+    vim.keymap.set("n", maps.buffer_remove, M.remove_buffer, { desc = "Morphy: buffer remove line" })
+  end
+  M._keymaps_registered = true
+end
+
+function M.setup(opts)
+  M.config = vim.tbl_deep_extend("force", vim.deepcopy(defaults), opts or {})
+  register_commands()
+  register_keymaps()
+end
+
+return M
