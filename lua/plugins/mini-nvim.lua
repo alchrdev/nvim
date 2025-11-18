@@ -2,7 +2,7 @@ return {
   { -- Collection of various small independent plugins/modules
     'echasnovski/mini.nvim',
     config = function()
-      -- Add/delete/replace surroundings (brackets, quotes, etc.)
+      -- Surrounds & pairs
       require('mini.surround').setup {
         custom_surroundings = {
           [')'] = { output = { left = '(', right = ')' } },
@@ -11,51 +11,91 @@ return {
       }
       require('mini.pairs').setup()
 
-      local statusline = require 'mini.statusline'
+      local statusline = require('mini.statusline')
 
-      local custom_fileinfo = function()
-        local filetype = vim.bo.filetype
-        local encoding = vim.bo.fileencoding or vim.bo.encoding
-        if filetype == '' then return '' end
-        return string.format('%s/%s', filetype, encoding)
+      -- Helpers ---------------------------------------------------------------
+      local function pad(s) return ' ' .. (s or '') .. ' ' end
+
+      -- Cache de grupos "Flat" sin fondo
+      vim.g._ashen_flat_cache = vim.g._ashen_flat_cache or {}
+
+      local function ensure_flat_group(group)
+        local flat = group .. 'Flat'
+        if not vim.g._ashen_flat_cache[flat] then
+          local ok, hl = pcall(vim.api.nvim_get_hl, 0, { name = group, link = false })
+          if ok and hl then
+            vim.api.nvim_set_hl(0, flat, {
+              fg = hl.fg, bg = 'NONE',
+              bold = hl.bold or false,
+              italic = hl.italic or false,
+              underline = hl.underline or false,
+            })
+          else
+            -- fallback, al menos enlaza
+            vim.api.nvim_set_hl(0, flat, { link = group })
+          end
+          vim.g._ashen_flat_cache[flat] = true
+        end
+        return flat
       end
 
-      local git_status = function()
-        local gitsigns = vim.b.gitsigns_status_dict
-        if not gitsigns then return '' end
+      -- Segmento condicionado a transparencia:
+      -- - Transparente: píldoras ( ) salvo que opts.force_flat=true
+      -- - Sólido: siempre plano + sin fondo (usa grupo ...Flat)
+      local function segment(group, text, border_group, opts)
+        text = tostring(text or '')
+        if text == '' then return '' end
+        opts = opts or {}
+        local transparent = vim.g.ashen_transparent
 
+        if transparent and not opts.force_flat then
+          return table.concat({
+            '%#' .. border_group .. '#%*',
+            '%#' .. group .. '#' .. pad(text) .. '%*',
+            '%#' .. border_group .. '#%*',
+          })
+        else
+          -- plano: quitar fondo usando grupo Flat
+          local flat = ensure_flat_group(group)
+          return '%#' .. flat .. '#' .. pad(text) .. '%*'
+        end
+      end
+
+      local function custom_fileinfo()
+        local ft  = vim.bo.filetype
+        local enc = vim.bo.fileencoding or vim.bo.encoding
+        if ft == '' then return '' end
+        return ft .. '/' .. enc
+      end
+
+      local function get_git_branch()
+        local head = vim.b.gitsigns_head
+          or (vim.b.gitsigns_status_dict and vim.b.gitsigns_status_dict.head)
+        if head and head ~= '' then return head end
+        local ok, out = pcall(vim.fn.systemlist, 'git rev-parse --abbrev-ref HEAD')
+        if ok and out and out[1] and not out[1]:match('^fatal') then
+          return out[1]
+        end
+        return ''
+      end
+
+      local function git_status()
+        local gs = vim.b.gitsigns_status_dict
+        if not gs then return '' end
         local parts = {}
-
-        if gitsigns.added and gitsigns.added > 0 then
-          table.insert(parts,
-            '%#GitBorderAdd#%*'
-            .. '%#MiniStatuslineGitAdd#+'
-            .. gitsigns.added
-            .. '%*%#GitBorderAdd#%*'
-          )
+        if (gs.added or 0) > 0 then
+          table.insert(parts, segment('MiniStatuslineGitAdd',    '+' .. gs.added,    'GitBorderAdd'))
         end
-
-        if gitsigns.changed and gitsigns.changed > 0 then
-          table.insert(parts,
-            '%#GitBorderChange#%*'
-            .. '%#MiniStatuslineGitChange#~'
-            .. gitsigns.changed
-            .. '%*%#GitBorderChange#%*'
-          )
+        if (gs.changed or 0) > 0 then
+          table.insert(parts, segment('MiniStatuslineGitChange', '~' .. gs.changed,  'GitBorderChange'))
         end
-
-        if gitsigns.removed and gitsigns.removed > 0 then
-          table.insert(parts,
-            '%#GitBorderRemove#%*'
-            .. '%#MiniStatuslineGitRemove#-'
-            .. gitsigns.removed
-            .. '%*%#GitBorderRemove#%*'
-          )
+        if (gs.removed or 0) > 0 then
+          table.insert(parts, segment('MiniStatuslineGitRemove', '-' .. gs.removed,  'GitBorderRemove'))
         end
-
         return table.concat(parts, ' ')
       end
 
+      -- Statusline ------------------------------------------------------------
       statusline.setup {
         content = {
           active = function()
@@ -64,7 +104,7 @@ return {
               ['no'] = { 'N',  'MiniStatuslineModeNormal' },
               ['v']  = { 'V',  'MiniStatuslineModeVisual' },
               ['V']  = { 'VL', 'MiniStatuslineModeVisual' },
-              ['\22'] = { 'VB', 'MiniStatuslineModeVisual' },
+              ['\22']= { 'VB', 'MiniStatuslineModeVisual' },
               ['i']  = { 'I',  'MiniStatuslineModeInsert' },
               ['ic'] = { 'I',  'MiniStatuslineModeInsert' },
               ['ix'] = { 'I',  'MiniStatuslineModeInsert' },
@@ -76,114 +116,64 @@ return {
               ['ce'] = { 'Ex', 'MiniStatuslineModeCommand' },
               ['s']  = { 'S',  'MiniStatuslineModeVisual' },
               ['S']  = { 'S',  'MiniStatuslineModeVisual' },
-              ['\19'] = { 'SB', 'MiniStatuslineModeVisual' },
+              ['\19']= { 'SB', 'MiniStatuslineModeVisual' },
               ['t']  = { 'T',  'MiniStatuslineModeNormal' },
             }
 
             local current_mode = vim.api.nvim_get_mode().mode
-            local mode_display, mode_hl = unpack(mode_map[current_mode] or { current_mode, 'MiniStatuslineModeNormal' })
+            local mode_display, mode_hl =
+              unpack(mode_map[current_mode] or { current_mode, 'MiniStatuslineModeNormal' })
 
             local filename = vim.fn.expand('%:~:.')
+            if filename == '' then filename = '[No Name]' end
             local location = '%2l:%-2v'
             local fileinfo = custom_fileinfo()
-            local git = git_status()
+            local git      = git_status()
+            local branch   = get_git_branch()
 
-            local function get_git_branch()
-              local branch = vim.b.gitsigns_head or (vim.b.gitsigns_status_dict and vim.b.gitsigns_status_dict.head)
-              if not branch then
-                local ok, result = pcall(vim.fn.systemlist, 'git rev-parse --abbrev-ref HEAD')
-                if ok and result and result[1] and not result[1]:match('^fatal') then
-                  branch = result[1]
-                end
-              end
-              return branch or ''
-            end
-
-            local branch = get_git_branch()
-
-            -- Spacing configuration
-            local spacing = {
-              between_pills = ' ', -- Space between right-side pills
-              after_git = '  ',    -- Space after git status
-            }
-
-            -- Build right section as a single string
+            -- Lado derecho: git + "segmentos" condicionales
             local right_parts = {}
+            if git ~= '' then table.insert(right_parts, git) end
 
-            -- Git status (with conditional space)
-            if git ~= '' then
-              table.insert(right_parts, git .. spacing.after_git)
+            local pills = {}
+            if branch ~= '' then
+              table.insert(pills, segment('MiniStatuslineBranch',   ' ' .. branch, 'MiniStatuslineBranchBorder'))
             end
+            table.insert(pills, segment('MiniStatuslineFileinfo',   fileinfo,        'MiniStatuslineFileinfoBorder'))
+            table.insert(pills, segment('MiniStatuslineLocation',   location,        'MiniStatuslineLocationBorder'))
 
-            -- Right-side pills (with restored curved borders)
-            local pills = {
+            table.insert(right_parts, table.concat(pills, ' '))
+            local right_section = table.concat(right_parts, '  ') -- 2 espacios tras git
 
-              -- Branch pill
-              '%#MiniStatuslineBranchBorder#%*'
-                .. '%#MiniStatuslineBranch# ' .. branch .. '%*'
-                .. '%#MiniStatuslineBranchBorder#%*',
-
-              -- Fileinfo pill  
-              '%#MiniStatuslineFileinfoBorder#%*'
-                .. '%#MiniStatuslineFileinfo#' .. fileinfo .. '%*'
-                .. '%#MiniStatuslineFileinfoBorder#%*',
-
-              -- Location pill
-              '%#MiniStatuslineLocationBorder#%*'
-                .. '%#MiniStatuslineLocation#' .. location .. '%*'
-                .. '%#MiniStatuslineLocationBorder#%*',
-            }
-
-            -- Join pills with configured spacing
-            table.insert(right_parts, table.concat(pills, spacing.between_pills))
-
-            local right_section = table.concat(right_parts, '')
-
-            return MiniStatusline.combine_groups {
-              {
-                strings = {
-                  '%#MiniStatuslineModeBorder#%*'
-                    .. '%#' .. mode_hl .. '#' .. mode_display .. '%*'
-                    .. '%#MiniStatuslineModeBorder#%*',
-                }
-              },
-              {
-                -- Filename pill (with restored curved borders)
-                strings = {
-                  '%#MiniStatuslineFilenameBorder#%*'
-                    .. '%#MiniStatuslineFilename#' .. filename .. '%*'
-                    .. '%#MiniStatuslineFilenameBorder#%*',
-                }
-              },
-              '', -- clear separation from filename
+            return statusline.combine_groups {
+              { strings = { segment(mode_hl, mode_display, 'MiniStatuslineModeBorder') } },
+              { strings = { segment('MiniStatuslineFilename', filename, 'MiniStatuslineFilenameBorder') } },
+              '', -- respiro
               '%=',
-
-              -- Entire right section as a single group
               { strings = { right_section } },
             }
           end,
 
           inactive = function()
             local filename = vim.fn.expand('%:~:.')
+            if filename == '' then filename = '[No Name]' end
             local fileinfo = custom_fileinfo()
-            return MiniStatusline.combine_groups {
-              {
-                strings = {
-                  '%#MiniStatuslineInactiveFilenameBorder#%*'
-                    .. '%#MiniStatuslineInactiveFilename#' .. filename .. '%*'
-                    .. '%#MiniStatuslineInactiveFilenameBorder#%*',
+            return statusline.combine_groups {
+              { strings = {
+                  -- En transparente, fuerza plano para evitar “orejas”.
+                  segment('MiniStatuslineInactiveFilename', filename,
+                          'MiniStatuslineInactiveFilenameBorder',
+                          { force_flat = vim.g.ashen_transparent })
                 }
               },
               '%=',
-              {
-                strings = {
-                  '%#MiniStatuslineInactiveFileinfoBorder#%*'
-                    .. '%#MiniStatuslineInactiveFileinfo#' .. fileinfo .. '%*'
-                    .. '%#MiniStatuslineInactiveFileinfoBorder#%*',
+              { strings = {
+                  segment('MiniStatuslineInactiveFileinfo', fileinfo,
+                          'MiniStatuslineInactiveFileinfoBorder',
+                          { force_flat = vim.g.ashen_transparent })
                 }
               },
             }
-
           end,
         },
       }
