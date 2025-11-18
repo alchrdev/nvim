@@ -1,18 +1,11 @@
 local vim = vim
 
-local niply = {}
+local M = {}
 
--- Store marks by project
-local marks_by_project = {}
-
--- Current detected project
-local current_project = nil
-
--- Default configuration
-local config = {
+local defaults = {
   max_marks = 10,
   persist_marks = true,
-  data_dir = vim.fn.stdpath("data") .. "/niply/",
+  data_dir = vim.fn.stdpath("data") .. "/niply",
   menu = {
     width = 60,
     height = 15,
@@ -24,193 +17,186 @@ local config = {
     separator = { fg = "#4c566a" },
     mark_number = { fg = "#d08770", bold = true },
     mark_path = { fg = "#e5e9f0" },
-  }
+  },
+  keymaps = {
+    add = "<leader>na",
+    remove = "<leader>nr",
+    menu = "<leader>nm",
+    clear = "<leader>nc",
+    show = "<leader>ns",
+    goto = true, -- map <leader>1..9
+  },
 }
 
--- Configure custom highlights
+M.config = vim.deepcopy(defaults)
+M.state = {
+  current_project = nil,
+  marks_by_project = {},
+  autocmd_registered = false,
+  namespace = vim.api.nvim_create_namespace("niply_highlights"),
+}
+
+local function camel(name)
+  return name:gsub("_(.)", function(c)
+    return c:upper()
+  end):gsub("^%l", string.upper)
+end
+
+local function highlight_group(name)
+  return "Niply" .. camel(name)
+end
+
 local function setup_highlights()
-  for name, opts in pairs(config.highlights) do
-    local hl_name = "Niply" .. name:gsub("_(.)", function(c) return c:upper() end):gsub("^%l", string.upper)
-    vim.api.nvim_set_hl(0, hl_name, vim.tbl_extend("force", opts, { default = true }))
+  for key, opts in pairs(M.config.highlights or {}) do
+    vim.api.nvim_set_hl(0, highlight_group(key), vim.tbl_extend("force", opts, { default = true }))
   end
 end
 
--- Create data directory if it doesn't exist
 local function ensure_data_dir()
-  if config.persist_marks then
-    vim.fn.mkdir(config.data_dir, "p")
+  if M.config.persist_marks then
+    vim.fn.mkdir(M.config.data_dir, "p")
   end
 end
 
--- Detect project root using modern vim.fs functions
-local function get_project_root()
-  local current_file = vim.api.nvim_buf_get_name(0)
-  local current_dir = current_file ~= "" and vim.fs.dirname(current_file) or vim.fn.getcwd()
+local function safe_project_name(path)
+  return (path or ""):gsub("[/\\:]", "_"):gsub("^_+", "")
+end
 
-  -- Try to detect using LSP first
+local function get_marks_file(project_root)
+  if not (M.config.persist_marks and project_root and project_root ~= "") then
+    return nil
+  end
+  return string.format("%s/%s_marks.json", M.config.data_dir, safe_project_name(project_root))
+end
+
+local function detect_project_root()
+  local bufname = vim.api.nvim_buf_get_name(0)
+  local start_dir = bufname ~= "" and vim.fs.dirname(bufname) or vim.fn.getcwd()
+
   local clients = vim.lsp.get_clients({ bufnr = 0 })
-  if #clients > 0 and clients[1].config.root_dir then
-    return clients[1].config.root_dir
+  for _, client in ipairs(clients) do
+    local root = client.config and client.config.root_dir
+    if root and root ~= "" then
+      return vim.fs.normalize(root)
+    end
   end
 
-  -- Use vim.fs.find for more efficient detection
-  local git_root = vim.fs.find(".git", {
-    path = current_dir,
-    upward = true,
-    type = "directory"
-  })[1]
-
+  local git_root = vim.fs.find(".git", { path = start_dir, upward = true, type = "directory" })[1]
   if git_root then
     return vim.fs.dirname(git_root)
   end
 
-  -- Fallback to cwd
   return vim.fn.getcwd()
 end
 
--- Generate filename for persistence
-local function get_marks_filename(project_root)
-  if not config.persist_marks then
-    return nil
-  end
-
-  local safe_name = project_root:gsub("[/\\:]", "_"):gsub("^_+", "")
-  return config.data_dir .. safe_name .. "_marks.json"
-end
-
--- Load marks from file with better error handling
-local function load_marks(project_root)
-  local filename = get_marks_filename(project_root)
-  if not filename or vim.fn.filereadable(filename) == 0 then
+local function load_marks_from_disk(project)
+  local file = get_marks_file(project)
+  if not file or vim.fn.filereadable(file) == 0 then
     return {}
   end
-
-  local ok, content = pcall(vim.fn.readfile, filename)
+  local ok, content = pcall(vim.fn.readfile, file)
   if not ok or #content == 0 then
     return {}
   end
-
-  local ok2, marks = pcall(vim.fn.json_decode, table.concat(content, "\n"))
-  if not ok2 or type(marks) ~= "table" then
+  local ok2, data = pcall(vim.fn.json_decode, table.concat(content, "\n"))
+  if not ok2 or type(data) ~= "table" then
     return {}
   end
-
-  -- Filter files that no longer exist
-  local valid_marks = {}
-  for _, mark in ipairs(marks) do
-    if vim.fn.filereadable(mark) == 1 then
-      table.insert(valid_marks, mark)
+  local filtered = {}
+  for _, path in ipairs(data) do
+    if vim.fn.filereadable(path) == 1 then
+      table.insert(filtered, path)
     end
   end
-
-  return valid_marks
+  return filtered
 end
 
--- Save marks to file with better error handling
-local function save_marks(project_root, marks)
-  local filename = get_marks_filename(project_root)
-  if not filename then
+local function save_marks_to_disk(project, marks)
+  local file = get_marks_file(project)
+  if not file then
     return
   end
-
   local ok, json = pcall(vim.fn.json_encode, marks)
   if not ok then
-    vim.notify("Niply: Error encoding marks to JSON", vim.log.levels.ERROR)
+    vim.notify("Niply: failed to encode marks", vim.log.levels.ERROR)
     return
   end
-
-  local ok2 = pcall(vim.fn.writefile, { json }, filename)
-  if not ok2 then
-    vim.notify("Niply: Error saving marks to file", vim.log.levels.ERROR)
+  local ok2, err = pcall(vim.fn.writefile, { json }, file)
+  if not ok2 or err == false then
+    vim.notify("Niply: failed to write marks file", vim.log.levels.ERROR)
   end
 end
 
--- Get marks for active project, initialize if it doesn't exist
 local function get_marks()
-  local project = get_project_root()
-  if current_project ~= project then
-    -- Save marks from previous project if there were changes
-    if current_project and marks_by_project[current_project] then
-      save_marks(current_project, marks_by_project[current_project])
+  local project = detect_project_root()
+  if M.state.current_project ~= project then
+    if M.state.current_project and M.state.marks_by_project[M.state.current_project] then
+      save_marks_to_disk(M.state.current_project, M.state.marks_by_project[M.state.current_project])
     end
-    current_project = project
-    if not marks_by_project[current_project] then
-      marks_by_project[current_project] = load_marks(current_project)
-    end
-  end
-  return marks_by_project[current_project]
-end
-
--- Normalize file path
-local function normalize_path(file)
-  return vim.fn.fnamemodify(file, ":p")
-end
-
--- Add file to marks
-function niply.add_file()
-  local marks = get_marks()
-  local file = normalize_path(vim.api.nvim_buf_get_name(0))
-
-  -- Verify that the file is not empty
-  if file == "" or file == normalize_path("") then
-    vim.notify("Niply: Cannot mark unnamed buffer", vim.log.levels.WARN)
-    return
-  end
-
-  -- Check if it already exists
-  for i, v in ipairs(marks) do
-    if v == file then
-      vim.notify("Niply: File already marked (#" .. i .. ")", vim.log.levels.INFO)
-      return
+    M.state.current_project = project
+    if not M.state.marks_by_project[project] then
+      M.state.marks_by_project[project] = load_marks_from_disk(project)
     end
   end
-
-  -- Check marks limit
-  if #marks >= config.max_marks then
-    vim.notify("Niply: Maximum marks reached (" .. config.max_marks .. ")", vim.log.levels.WARN)
-    return
-  end
-
-  table.insert(marks, file)
-  save_marks(current_project, marks)
-
-  local relative_path = vim.fn.fnamemodify(file, ":~:.")
-  if not relative_path or relative_path == "" then
-    relative_path = file -- Fallback to full path
-  end
-
-  vim.notify("Niply: Marked file #" .. #marks .. ": " .. relative_path, vim.log.levels.INFO)
+  return M.state.marks_by_project[project], project
 end
 
--- Remove file from marks
-function niply.remove_file()
-  local marks = get_marks()
-  local file = normalize_path(vim.api.nvim_buf_get_name(0))
+local function normalize_path(path)
+  return vim.fn.fnamemodify(path or "", ":p")
+end
 
-  for i, v in ipairs(marks) do
-    if v == file then
-      table.remove(marks, i)
-      save_marks(current_project, marks)
-      vim.notify("Niply: Unmarked file: " .. vim.fn.fnamemodify(file, ":~:."), vim.log.levels.INFO)
-      return
+local function format_path(path)
+  local formatted = vim.fn.fnamemodify(path, ":~:.")
+  if not formatted or formatted == "" then
+    formatted = path
+  end
+  return formatted
+end
+
+local function render_menu_lines(project, marks, width)
+  local lines = {}
+  table.insert(lines, string.format("Project: %s", vim.fn.fnamemodify(project, ":t")))
+  table.insert(lines, string.rep("─", math.max(2, width - 2)))
+  for idx, file in ipairs(marks) do
+    local path = format_path(file)
+    if #path > width - 8 then
+      path = "..." .. path:sub(-(width - 11))
+    end
+    table.insert(lines, string.format("%d: %s", idx, path))
+  end
+  return lines
+end
+
+local function apply_menu_highlights(buf, marks)
+  vim.api.nvim_buf_clear_namespace(buf, M.state.namespace, 0, -1)
+  vim.api.nvim_buf_add_highlight(buf, M.state.namespace, highlight_group("project_name"), 0, 0, -1)
+  vim.api.nvim_buf_add_highlight(buf, M.state.namespace, highlight_group("separator"), 1, 0, -1)
+
+  for idx = 1, #marks do
+    local line = idx + 1
+    local text = vim.api.nvim_buf_get_lines(buf, line, line + 1, false)[1] or ""
+    local colon = text:find(":")
+    if colon then
+      vim.api.nvim_buf_add_highlight(buf, M.state.namespace, highlight_group("mark_number"), line, 0, colon)
+      vim.api.nvim_buf_add_highlight(buf, M.state.namespace, highlight_group("mark_path"), line, colon + 1, -1)
     end
   end
-
-  vim.notify("Niply: File not in marks", vim.log.levels.WARN)
 end
 
--- Open quick marks menu with optimized rendering
-local function open_quick_menu()
-  local marks = get_marks()
+local function open_menu()
+  local marks, project = get_marks()
   if #marks == 0 then
-    vim.notify("Niply: No marked files in this project.", vim.log.levels.WARN)
+    vim.notify("Niply: no marks in this project", vim.log.levels.INFO)
     return
   end
 
   local buf = vim.api.nvim_create_buf(false, true)
-  local width = config.menu.width
-  local height = math.min(#marks + 2, config.menu.height)
+  vim.bo[buf].bufhidden = "wipe"
+  vim.bo[buf].buftype = "nofile"
+  vim.bo[buf].filetype = "niplymenu"
 
+  local width = M.config.menu.width
+  local height = math.min(#marks + 2, M.config.menu.height)
   local opts = {
     relative = "editor",
     width = width,
@@ -218,289 +204,236 @@ local function open_quick_menu()
     row = math.floor((vim.o.lines - height) / 2),
     col = math.floor((vim.o.columns - width) / 2),
     style = "minimal",
-    border = config.menu.border,
-    title = config.menu.title,
+    border = M.config.menu.border,
+    title = M.config.menu.title,
     title_pos = "center",
   }
 
-  -- Set buffer options using modern vim.bo
-  vim.bo[buf].bufhidden = 'wipe'
-  vim.bo[buf].filetype = 'niplymenu'
-  vim.bo[buf].buftype = 'nofile'
-  vim.bo[buf].swapfile = false
-  vim.bo[buf].modifiable = true
-
-  local display_lines = {}
-  local project_name = vim.fn.fnamemodify(current_project, ":t")
-  table.insert(display_lines, "Project: " .. project_name)
-  table.insert(display_lines, string.rep("─", width - 2))
-
-  for i, file in ipairs(marks) do
-    local relative_path = vim.fn.fnamemodify(file, ":~:.")
-    if not relative_path then
-      relative_path = file
-    end
-    local display_path = relative_path
-    if #display_path > width - 8 then
-      display_path = "..." .. display_path:sub(-(width - 11))
-    end
-    table.insert(display_lines, string.format("%d: %s", i, display_path))
-  end
-
-  vim.api.nvim_buf_set_lines(buf, 0, -1, false, display_lines)
-
-  -- Apply highlights using nvim_buf_add_highlight
-  local ns_id = vim.api.nvim_create_namespace("niply_highlights")
-
-  -- Project name highlight
-  vim.api.nvim_buf_add_highlight(buf, ns_id, "NiplyProjectName", 0, 0, -1)
-  -- Separator highlight
-  vim.api.nvim_buf_add_highlight(buf, ns_id, "NiplySeparator", 1, 0, -1)
-
-  -- Mark highlights
-  for i, _ in ipairs(marks) do
-    local line_idx = i + 1 -- +1 because marks start at line 3 (index 2)
-    local line_text = display_lines[line_idx + 1]
-    local colon_pos = line_text:find(":")
-    if colon_pos then
-      vim.api.nvim_buf_add_highlight(buf, ns_id, "NiplyMarkNumber", line_idx, 0, colon_pos)
-      vim.api.nvim_buf_add_highlight(buf, ns_id, "NiplyMarkPath", line_idx, colon_pos + 1, -1)
-    end
-  end
-
+  vim.api.nvim_buf_set_lines(buf, 0, -1, false, render_menu_lines(project, marks, width))
   vim.bo[buf].modifiable = false
-
   local win = vim.api.nvim_open_win(buf, true, opts)
-  -- Position cursor on first mark (line 3)
-  vim.api.nvim_win_set_cursor(win, {3, 0})
+  vim.api.nvim_win_set_cursor(win, { 3, 0 })
+  apply_menu_highlights(buf, marks)
 
-  local function close_menu()
+  local function close()
     if vim.api.nvim_win_is_valid(win) then
       vim.api.nvim_win_close(win, true)
     end
   end
 
-  local function open_file()
+  local function open_at_cursor()
     local cursor = vim.api.nvim_win_get_cursor(win)
-    local line_nr = cursor[1] - 2 -- Adjust for header
-    if line_nr < 1 then
-      line_nr = 1
-    end
-    local file = marks[line_nr]
+    local index = cursor[1] - 2
+    local file = marks[index]
     if file then
-      close_menu()
-      vim.cmd("edit " .. vim.fn.fnameescape(file))
+      close()
+      vim.cmd.edit(vim.fn.fnameescape(file))
     else
-      vim.notify("Niply: Invalid selection", vim.log.levels.ERROR)
+      vim.notify("Niply: invalid selection", vim.log.levels.ERROR)
     end
   end
 
-  local function delete_mark()
+  local function refresh_buffer()
+    vim.bo[buf].modifiable = true
+    vim.api.nvim_buf_set_lines(buf, 0, -1, false, render_menu_lines(project, marks, width))
+    vim.bo[buf].modifiable = false
+    apply_menu_highlights(buf, marks)
     local cursor = vim.api.nvim_win_get_cursor(win)
-    local line_nr = cursor[1] - 2 -- Adjust for header
-    if line_nr < 1 then
+    local max_line = #marks + 2
+    if cursor[1] > max_line then
+      vim.api.nvim_win_set_cursor(win, { max_line, 0 })
+    end
+  end
+
+  local function remove_at_cursor()
+    local cursor = vim.api.nvim_win_get_cursor(win)
+    local index = cursor[1] - 2
+    if index < 1 or not marks[index] then
       return
     end
-
-    if marks[line_nr] then
-      local removed_file = table.remove(marks, line_nr)
-      save_marks(current_project, marks)
-
-      if #marks == 0 then
-        close_menu()
-        vim.notify("Niply: No more marks in this project.", vim.log.levels.INFO)
-        return
-      end
-
-      -- Update buffer efficiently
-      vim.bo[buf].modifiable = true
-
-      local new_lines = {"Project: " .. vim.fn.fnamemodify(current_project, ":t"), string.rep("─", width - 2)}
-      for i, file in ipairs(marks) do
-        local relative_path = vim.fn.fnamemodify(file, ":~:.")
-        if not relative_path then
-          relative_path = file
-        end
-        local display_path = relative_path
-        if #display_path > width - 8 then
-          display_path = "..." .. display_path:sub(-(width - 11))
-        end
-        table.insert(new_lines, string.format("%d: %s", i, display_path))
-      end
-
-      vim.api.nvim_buf_set_lines(buf, 0, -1, false, new_lines)
-
-      -- Reapply highlights efficiently
-      vim.api.nvim_buf_clear_namespace(buf, ns_id, 0, -1)
-      vim.api.nvim_buf_add_highlight(buf, ns_id, "NiplyProjectName", 0, 0, -1)
-      vim.api.nvim_buf_add_highlight(buf, ns_id, "NiplySeparator", 1, 0, -1)
-
-      for i, _ in ipairs(marks) do
-        local line_idx = i + 1
-        local line_text = new_lines[line_idx + 1]
-        local colon_pos = line_text:find(":")
-        if colon_pos then
-          vim.api.nvim_buf_add_highlight(buf, ns_id, "NiplyMarkNumber", line_idx, 0, colon_pos)
-          vim.api.nvim_buf_add_highlight(buf, ns_id, "NiplyMarkPath", line_idx, colon_pos + 1, -1)
-        end
-      end
-
-      vim.bo[buf].modifiable = false
-
-      -- Adjust cursor if last line was deleted
-      local pos = (line_nr > #marks) and (#marks + 2) or (line_nr + 2)
-      vim.api.nvim_win_set_cursor(win, {pos, 0})
-
-      if removed_file then
-        local file_name = vim.fn.fnamemodify(removed_file, ":t")
-        if not file_name then
-          file_name = removed_file
-        end
-        vim.notify("Niply: Removed mark: " .. file_name, vim.log.levels.INFO)
-      end
+    local removed = table.remove(marks, index)
+    save_marks_to_disk(project, marks)
+    if #marks == 0 then
+      close()
+      vim.notify("Niply: no marks left", vim.log.levels.INFO)
+      return
     end
+    refresh_buffer()
+    vim.notify("Niply: removed mark " .. format_path(removed), vim.log.levels.INFO)
   end
 
-  local function move_cursor(direction)
+  local function move(direction)
     local cursor = vim.api.nvim_win_get_cursor(win)
-    local line_nr = cursor[1]
-    local min_line = 3
-    local max_line = #marks + 2
-
-    if direction == "up" and line_nr > min_line then
-      vim.api.nvim_win_set_cursor(win, {line_nr - 1, 0})
-    elseif direction == "down" and line_nr < max_line then
-      vim.api.nvim_win_set_cursor(win, {line_nr + 1, 0})
+    local line = cursor[1]
+    if direction == "up" and line > 3 then
+      vim.api.nvim_win_set_cursor(win, { line - 1, 0 })
+    elseif direction == "down" and line < #marks + 2 then
+      vim.api.nvim_win_set_cursor(win, { line + 1, 0 })
     end
   end
 
-  -- Optimized keymap setup
-  local keymaps = {
-    ['<CR>'] = open_file,
-    ['o'] = open_file,
-    ['<Space>'] = open_file,
-    ['dd'] = delete_mark,
-    ['x'] = delete_mark,
-    ['<Del>'] = delete_mark,
-    ['q'] = close_menu,
-    ['<Esc>'] = close_menu,
-    ['j'] = function() move_cursor("down") end,
-    ['k'] = function() move_cursor("up") end,
-    ['<Down>'] = function() move_cursor("down") end,
-    ['<Up>'] = function() move_cursor("up") end,
+  local mappings = {
+    ["<CR>"] = open_at_cursor,
+    o = open_at_cursor,
+    ["<Space>"] = open_at_cursor,
+    q = close,
+    ["<Esc>"] = close,
+    x = remove_at_cursor,
+    dd = remove_at_cursor,
+    ["<Del>"] = remove_at_cursor,
+    j = function()
+      move("down")
+    end,
+    k = function()
+      move("up")
+    end,
+    ["<Down>"] = function()
+      move("down")
+    end,
+    ["<Up>"] = function()
+      move("up")
+    end,
   }
 
-  for key, func in pairs(keymaps) do
-    vim.keymap.set('n', key, func, {
-      nowait = true,
-      noremap = true,
-      silent = true,
-      buffer = buf,
-    })
+  for lhs, rhs in pairs(mappings) do
+    vim.keymap.set("n", lhs, rhs, { buffer = buf, noremap = true, silent = true, nowait = true })
   end
 
-  -- Add numbers for direct navigation
   for i = 1, math.min(#marks, 9) do
-    vim.keymap.set('n', tostring(i), function()
-        close_menu()
-        niply.nav_file(i)
-      end, {
-      nowait = true,
-      noremap = true,
-      silent = true,
-      buffer = buf,
-    })
+    vim.keymap.set("n", tostring(i), function()
+      close()
+      M.nav_file(i)
+    end, { buffer = buf, noremap = true, silent = true, nowait = true })
   end
 end
 
-niply.toggle_quick_menu = open_quick_menu
-
--- Navigate to file by index
-function niply.nav_file(idx)
-  local marks = get_marks()
-  local file = marks[idx]
-  if file then
-    vim.cmd("edit " .. vim.fn.fnameescape(file))
-  else
-    vim.notify("Niply: Mark #" .. idx .. " does not exist in this project.", vim.log.levels.ERROR)
-  end
+local function notify(msg, level)
+  vim.notify("Niply: " .. msg, level or vim.log.levels.INFO)
 end
 
--- Clear all marks with improved confirmation
-function niply.clear_all_marks()
-  local marks = get_marks()
-  local count = #marks
-  if count == 0 then
-    vim.notify("Niply: No marks to clear in this project.", vim.log.levels.INFO)
+function M.add_mark()
+  local marks, project = get_marks()
+  local file = normalize_path(vim.api.nvim_buf_get_name(0))
+  if file == "" then
+    notify("cannot mark unnamed buffer", vim.log.levels.WARN)
     return
   end
+  for idx, path in ipairs(marks) do
+    if path == file then
+      notify(string.format("file already marked (#%d)", idx))
+      return
+    end
+  end
+  if #marks >= M.config.max_marks then
+    notify("maximum marks reached (" .. M.config.max_marks .. ")", vim.log.levels.WARN)
+    return
+  end
+  table.insert(marks, file)
+  save_marks_to_disk(project, marks)
+  notify("marked #" .. #marks .. ": " .. format_path(file))
+end
 
-  -- Use vim.fn.confirm for compatibility
-  local prompt_text = "Clear all " .. tostring(count) .. " marks for this project?"
-  local choice = vim.fn.confirm(prompt_text, "&Yes\n&No", 2)
-  if choice == 1 then
-    vim.tbl_clear(marks) -- Efficient way to empty the table
-    save_marks(current_project, marks)
-    vim.notify("Niply: Cleared " .. count .. " marks for this project.", vim.log.levels.INFO)
+function M.remove_mark()
+  local marks, project = get_marks()
+  local file = normalize_path(vim.api.nvim_buf_get_name(0))
+  for idx, path in ipairs(marks) do
+    if path == file then
+      table.remove(marks, idx)
+      save_marks_to_disk(project, marks)
+      notify("unmarked: " .. format_path(file))
+      return
+    end
+  end
+  notify("file not in marks", vim.log.levels.WARN)
+end
+
+function M.nav_file(idx)
+  local marks = get_marks()
+  local target = marks[idx]
+  if target then
+    vim.cmd.edit(vim.fn.fnameescape(target))
+  else
+    notify(string.format("mark #%d does not exist", idx), vim.log.levels.ERROR)
   end
 end
 
--- Show marks information
-function niply.show_marks()
+function M.clear_marks()
+  local marks, project = get_marks()
+  if #marks == 0 then
+    notify("no marks to clear")
+    return
+  end
+  local choice = vim.fn.confirm(string.format("Clear all %d marks?", #marks), "&Yes\n&No", 2)
+  if choice == 1 then
+    vim.tbl_clear(marks)
+    save_marks_to_disk(project, marks)
+    notify("cleared marks for project")
+  end
+end
+
+function M.show_marks()
   local marks = get_marks()
   if #marks == 0 then
-    vim.notify("Niply: No marks in this project.", vim.log.levels.INFO)
+    notify("no marks in this project")
     return
   end
-
-  local project_name = vim.fn.fnamemodify(current_project, ":t")
-  local lines = {"Niply Marks for project: " .. project_name, ""}
-
-  for i, file in ipairs(marks) do
-    local relative_path = vim.fn.fnamemodify(file, ":~:.")
-    if not relative_path then
-      relative_path = file
-    end
-    table.insert(lines, string.format("%d: %s", i, relative_path))
+  local lines = { "Marks for " .. format_path(M.state.current_project) }
+  for idx, file in ipairs(marks) do
+    table.insert(lines, string.format("%d: %s", idx, format_path(file)))
   end
-
-  vim.notify(table.concat(lines, "\n"), vim.log.levels.INFO)
+  notify(table.concat(lines, "\n"))
 end
 
--- Configure Niply
-function niply.setup(opts)
-  opts = opts or {}
-  config = vim.tbl_deep_extend("force", config, opts)
+M.toggle_menu = open_menu
+
+local function map(lhs, rhs, desc)
+  vim.keymap.set("n", lhs, rhs, { desc = desc, silent = true })
+end
+
+local function setup_keymaps()
+  local maps = M.config.keymaps
+  if maps == false then
+    return
+  end
+  if maps.add then
+    map(maps.add, M.add_mark, "Niply: add mark")
+  end
+  if maps.remove then
+    map(maps.remove, M.remove_mark, "Niply: remove mark")
+  end
+  if maps.menu then
+    map(maps.menu, M.toggle_menu, "Niply: quick menu")
+  end
+  if maps.clear then
+    map(maps.clear, M.clear_marks, "Niply: clear marks")
+  end
+  if maps.show then
+    map(maps.show, M.show_marks, "Niply: list marks")
+  end
+  if maps.goto then
+    for i = 1, 9 do
+      map(string.format("<leader>%d", i), function()
+        M.nav_file(i)
+      end, string.format("Niply: goto mark %d", i))
+    end
+  end
+end
+
+function M.setup(opts)
+  M.config = vim.tbl_deep_extend("force", vim.deepcopy(defaults), opts or {})
   ensure_data_dir()
   setup_highlights()
-
-  -- Save marks when exiting Neovim
-  if config.persist_marks then
+  if M.config.persist_marks and not M.state.autocmd_registered then
     vim.api.nvim_create_autocmd("VimLeavePre", {
       callback = function()
-        if current_project and marks_by_project[current_project] then
-          save_marks(current_project, marks_by_project[current_project])
+        if M.state.current_project and M.state.marks_by_project[M.state.current_project] then
+          save_marks_to_disk(M.state.current_project, M.state.marks_by_project[M.state.current_project])
         end
       end,
     })
+    M.state.autocmd_registered = true
   end
+  setup_keymaps()
 end
 
--- Default configuration
-niply.setup()
-
--- Default keymaps
-vim.keymap.set('n', '<leader>na', niply.add_file, { desc = 'Niply: Mark file' })
-vim.keymap.set('n', '<leader>nr', niply.remove_file, { desc = 'Niply: Remove mark' })
-vim.keymap.set('n', '<leader>nm', niply.toggle_quick_menu, { desc = 'Niply: Quick menu' })
-vim.keymap.set('n', '<leader>nc', niply.clear_all_marks, { desc = 'Niply: Clear all marks' })
-vim.keymap.set('n', '<leader>ns', niply.show_marks, { desc = 'Niply: Show marks' })
-
--- Quick navigation by numbers
-for i = 1, 9 do
-  vim.keymap.set('n', '<leader>' .. i, function() niply.nav_file(i) end, {
-    desc = 'Niply: Go to mark ' .. i
-  })
-end
-
-return niply
+return M
