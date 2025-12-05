@@ -1,223 +1,375 @@
--- Theme: ashen-dusk
--- A custom low-vision friendly adaptation of rose-pine
--- Optimized for reduced eye strain and improved syntax distinction
+-- ASHEN-DUSK THEME
+-- Low-vision optimized 
+
 return {
   {
-    'rose-pine/neovim',
-    as = 'rose-pine',
+    "rose-pine/neovim",
+    as = "rose-pine",
     priority = 1000,
+
     config = function()
-      -- Global toggle for transparency (persist across reloads)
+      ---------------------------------------------------------------------------
+      -- Estado persistente entre sesiones
+      ---------------------------------------------------------------------------
       if vim.g.ashen_transparent == nil then
-        vim.g.ashen_transparent = true  -- default: transparente
+        vim.g.ashen_transparent = false
       end
 
-      -- Build highlights depending on mode (solid vs transparent)
-      local function build_overlay_highlights(is_solid)
-        local t = {
-          -- Core Neovim
-          CurSearch   = { bg = 'git_visual_bg', fg = 'pine' },
-          CursorWord  = { fg = 'reference_text',  bg = 'highlight_med', bold = false },
-          CursorWord0 = { fg = 'reference_read',  bg = 'git_visual_bg', bold = false },
-          CursorWord1 = { fg = 'reference_write', bg = 'git_command_bg', bold = false },
-          FloatBorder = { fg = 'highlight_med' },
-          FloatTitle  = { fg = 'pine', bold = true },
-          IncSearch   = { bg = 'git_remove_bg', fg = 'iris' },
-          Search      = { bg = 'git_add_bg' },
-          VertSplit   = { fg = 'highlight_med' },
-          Visual      = { bg = 'highlight_med', inherit = false },
-          WinSeparator= { fg = 'highlight_low' },
-          Directory   = { fg = 'foam', bold = true },
+      ---------------------------------------------------------------------------
+      -- PALETA BASE 
+      ---------------------------------------------------------------------------
+      local P = {
+        base = "#1C1B1A",
+        surface = "#232220",
+        overlay = "#232220",
+        highlight_low = "#242322",
+        highlight_med = "#2A2928",
+        highlight_high = "#383634",
 
-          -- LSP refs
-          LspReferenceRead  = { fg = 'reference_read',  bg = 'git_visual_bg', bold = false },
-          LspReferenceText  = { fg = 'reference_text',  bg = 'highlight_med', bold = false },
-          LspReferenceWrite = { fg = 'reference_write', bg = 'git_command_bg', bold = false },
+        text = "#CECDC3",
+        subtle = "#878580",
+        muted = "#6F6E69",
 
-          -- Git signs
-          GitSignsAdd            = { fg = 'git_add_color' },
-          GitSignsChange         = { fg = 'git_change_color' },
-          GitSignsChangeDelete   = { fg = 'git_change_color' },
-          GitSignsDelete         = { fg = 'git_remove_color' },
-          GitSignsTopDelete      = { fg = 'git_remove_color' },
+        love = "#B76E74",
+        gold = "#B28A4F",
+        rose = "#937B97",
+        pine = "#8C7D9B",
+        foam = "#7782A3",
+        iris = "#96799C",
 
-          -- mini.statusline (core blocks)
-          MiniStatuslineBranch             = { fg = 'rose',             bg = 'branch_bg', bold = true },
-          MiniStatuslineDevinfo            = { fg = 'devinfo_text',     bg = 'devinfo_bg' },
-          MiniStatuslineFileinfo           = { fg = 'reference_read',   bg = 'fileinfo_bg' },
-          MiniStatuslineFilename           = { fg = 'reference_text',   bg = 'filename_bg' },
-          MiniStatuslineGitAdd             = { fg = 'git_add_color',    bg = 'git_add_bg' },
-          MiniStatuslineGitChange          = { fg = 'git_change_color', bg = 'git_change_bg' },
-          MiniStatuslineGitRemove          = { fg = 'git_remove_color', bg = 'git_remove_bg' },
-          MiniStatuslineInactiveFileinfo   = { fg = 'inactive_fileinfo_text', bg = 'inactive_fileinfo_bg' },
-          MiniStatuslineInactiveFilename   = { fg = 'inactive_text',    bg = 'inactive_border' },
-          MiniStatuslineLocation           = { fg = 'location_text',    bg = 'location_bg' },
-          MiniStatuslineModeCommand        = { fg = 'gold',             bg = 'git_command_bg' },
-          MiniStatuslineModeInsert         = { fg = 'git_add_color',    bg = 'git_add_bg' },
-          MiniStatuslineModeNormal         = { fg = 'git_change_color', bg = 'git_change_bg' },
-          MiniStatuslineModeReplace        = { fg = 'git_remove_color', bg = 'git_remove_bg' },
-          MiniStatuslineModeVisual         = { fg = 'pine',             bg = 'git_visual_bg' },
-          MiniIconsAzure                   = { fg = 'foam' },
+        git_add_bg = "#252D2C",
+        git_add_color = "#819787",
+        git_change_bg = "#22282B",
+        git_change_color = "#75929F",
+        git_remove_bg = "#2A252B",
+        git_remove_color = "#B0818B",
+        git_visual_bg = "#28252A",
+        git_command_bg = "#2C2723",
 
-          -- Render Markdown
-          RenderMarkdownDash = { fg = 'highlight_low' },
+        reference_text  = "#9EA2B4",
+        reference_read  = "#7C8A96",
+        reference_write = "#8A7C59",
 
-          -- Snacks
-          SnacksDashboardHeader  = { fg = 'pine', bold = true },
-          SnacksDashboardIcon    = { fg = 'foam' },
-          SnacksDashboardKey     = { fg = 'foam', italic = true },
-          SnacksDashboardDesc    = { fg = 'subtle' },
-          SnacksDashboardSpecial = { fg = 'reference_text' },
-          SnacksDashboardFooter  = { fg = 'reference_text' },
-          SnacksPickerTotals     = { fg = 'subtitle_tone' },
-          SnacksExplorerGitAdded    = { fg = 'git_add_color' },
-          SnacksExplorerGitCommit   = { fg = 'reference_text' },
-          SnacksExplorerGitDeleted  = { fg = 'git_remove_color' },
-          SnacksExplorerGitIgnored  = { fg = 'muted' },
-          SnacksExplorerGitModified = { fg = 'git_change_color' },
-          SnacksExplorerGitRenamed  = { fg = 'pine' },
-          SnacksExplorerGitStaged   = { fg = 'git_add_color' },
-          SnacksExplorerGitUnmerged = { fg = 'iris' },
-          SnacksExplorerGitUntracked= { fg = 'subtle' },
-          SnacksInputIcon   = { fg = 'iris' },
-          SnacksInputPrompt = { fg = 'color_sample' },
-          SnacksInputTitle  = { fg = 'text' },
-          SnacksInputBorder = { fg = 'color_sample' },
-          NotifyINFOTitle   = { fg = 'subtitle_tone' },
-          NotifyINFOBorder  = { fg = 'subtitle_tone' },
-          NotifyINFOBody    = { fg = 'subtitle_tone' },
+        inactive_border = "#1A1A1A",
+        inactive_text   = "#707070",
+      }
 
-          -- RRethy/vim-illuminate
-          IlluminatedWordRead  = { fg = 'reference_read',  bg = '#26231a', bold = false },
-          IlluminatedWordText  = { fg = 'reference_text',  bg = '#2d2a21', bold = false },
-          IlluminatedWordWrite = { fg = 'reference_write', bg = '#3a2a25', bold = false },
+      ---------------------------------------------------------------------------
+      -- HIGHLIGHTS PARA MODO SÓLIDO
+      ---------------------------------------------------------------------------
+      local function solid_highlights()
+        return {
 
-          -- Treesitter
-          ['@markup.raw.block.markdown']         = { fg = 'text' },
-          ['@markup.link.label.markdown_inline'] = { fg = 'gold' },
+          -- ============================
+          -- SYNTAX (TREESITTER)
+          -- ============================
+          ["@keyword"]                           = { fg = P.love, bold = false },
+          ["@keyword.return"]                    = { fg = P.love, bold = false },
+          ["@keyword.function"]                  = { fg = P.love, bold = false },
+          ["@type"]                              = { fg = P.pine, bold = false },
+          ["@type.builtin"]                      = { fg = P.pine, bold = false },
+          ["@function"]                          = { fg = P.rose, bold = false },
+          ["@function.builtin"]                  = { fg = P.rose, bold = false },
+          ["@method"]                            = { fg = P.rose, bold = false },
+          ["@variable"]                          = { fg = P.foam },
+          ["@variable.parameter"]                = { fg = P.foam },
+          ["@variable.builtin"]                  = { fg = P.foam },
+          ["@constant"]                          = { fg = P.gold },
+          ["@constant.builtin"]                  = { fg = P.gold },
+          ["@string"]                            = { fg = P.gold },
+          ["@string.special"]                    = { fg = P.gold },
+          ["@number"]                            = { fg = P.gold },
+          ["@boolean"]                           = { fg = P.gold },
+          ["@operator"]                          = { fg = P.iris },
+          ["@punctuation"]                       = { fg = P.iris },
+          ["@punctuation.delimiter"]             = { fg = P.iris },
+          ["@property"]                          = { fg = P.foam },
+          ["@field"]                             = { fg = P.foam },
+          ["@constructor"]                       = { fg = P.rose },
+          ["@tag"]                               = { fg = P.love },
+          ["@tag.attribute"]                     = { fg = P.foam },
+          ["@attribute"]                         = { fg = P.foam },
+
+          ---------------------------------------------------------------------
+          -- EDITOR CORE
+          ---------------------------------------------------------------------
+          Normal                                 = { bg = P.base, fg = P.text },
+          NormalFloat                            = { bg = P.surface, fg = P.text },
+          FloatBorder                            = { bg = P.surface, fg = P.surface },
+          FloatTitle                             = { bg = P.surface, fg = P.subtle, bold = false },
+
+          CursorLine                             = { bg = P.highlight_low },
+          CursorWord                             = { bg = P.highlight_med, fg = P.reference_text },
+
+          Search                                 = { bg = P.git_add_bg },
+          IncSearch                              = { bg = P.git_remove_bg, fg = P.iris },
+
+          ---------------------------------------------------------------------
+          -- SEPARADORES (invisibles en modo sólido)
+          ---------------------------------------------------------------------
+          VertSplit                              = { fg = P.base, bg = P.base },
+          WinSeparator                           = { fg = P.base, bg = P.base },
+
+          ---------------------------------------------------------------------
+          -- WINBAR / TABS 
+          ---------------------------------------------------------------------
+          WinBar                                 = { bg = P.surface, fg = P.subtle },
+          WinBarNC                               = { bg = P.surface, fg = P.muted },
+
+          TabLine                                = { bg = P.surface, fg = P.subtle },
+          TabLineFill                            = { bg = P.surface, fg = P.subtle },
+          TabLineSel                             = { bg = P.surface, fg = P.text, bold = true },
+
+          ---------------------------------------------------------------------
+          -- EXPLORER / SNACKS 
+          ---------------------------------------------------------------------
+          SnacksExplorerNormal                   = { bg = P.surface, fg = P.text },
+          SnacksExplorerBorder                   = { bg = P.surface, fg = P.surface },
+          SnacksExplorerTitle                    = { bg = P.surface, fg = P.subtle, bold = false },
+
+          SnacksPicker                           = { bg = P.surface, fg = P.text },
+          SnacksPickerBorder                     = { bg = P.surface, fg = P.surface },
+          SnacksPickerTitle                      = { bg = P.surface, fg = P.subtle, bold = false },
+
+          ---------------------------------------------------------------------
+          -- PMENU (lista desplegable)
+          ---------------------------------------------------------------------
+          Pmenu                                  = { bg = P.surface, fg = P.text },
+          PmenuSbar                              = { bg = P.surface },
+          PmenuThumb                             = { bg = P.highlight_med },
+          PmenuSel                               = { bg = P.highlight_med, fg = P.text },
+
+          ---------------------------------------------------------------------
+          -- INPUTS 
+          ---------------------------------------------------------------------
+          SnacksInputNormal                      = { bg = P.surface, fg = P.text },
+          SnacksInputBorder                      = { bg = P.surface, fg = P.surface },
+          SnacksInputTitle                       = { bg = P.surface, fg = P.subtle, bold = false },
+
+          ---------------------------------------------------------------------
+          -- MARKDOWN
+          ---------------------------------------------------------------------
+          ["@markup.raw.block.markdown"]         = { fg = P.text },
+          ["@markup.link.label.markdown_inline"] = { fg = P.gold },
+          RenderMarkdownCode                     = { bg = P.surface },
+          RenderMarkdownCodeInline               = { bg = P.surface },
+
+          ---------------------------------------------------------------------
+          -- GIT
+          ---------------------------------------------------------------------
+          GitSignsAdd                            = { fg = P.git_add_color },
+          GitSignsChange                         = { fg = P.git_change_color },
+          GitSignsDelete                         = { fg = P.git_remove_color },
+
+          ---------------------------------------------------------------------
+          -- LSP REFERENCES
+          ---------------------------------------------------------------------
+          LspReferenceRead                       = { bg = P.git_visual_bg, fg = P.reference_read },
+          LspReferenceText                       = { bg = P.highlight_med, fg = P.reference_text },
+          LspReferenceWrite                      = { bg = P.git_command_bg, fg = P.reference_write },
+
+          ---------------------------------------------------------------------
+          -- STATUSLINE
+          ---------------------------------------------------------------------
+          StatusLine                             = { bg = P.surface, fg = P.subtle },
+          StatusLineNC                           = { bg = P.surface, fg = P.inactive_text },
+
+          ---------------------------------------------------------------------
+          -- SNACKS EXPLORER GIT ICONS 
+          ---------------------------------------------------------------------
+          SnacksExplorerGitAdded                 = { fg = P.git_add_color, bg = P.surface },
+          SnacksExplorerGitModified              = { fg = P.git_change_color, bg = P.surface },
+          SnacksExplorerGitDeleted               = { fg = P.git_remove_color, bg = P.surface },
+          SnacksExplorerGitStaged                = { fg = P.git_change_color, bg = P.surface },
+          SnacksExplorerGitRenamed               = { fg = P.foam, bg = P.surface },
+          SnacksExplorerGitUnmerged              = { fg = P.love, bg = P.surface },
+          SnacksExplorerGitUntracked             = { fg = P.muted, bg = P.surface },
+          SnacksExplorerGitIgnored               = { fg = P.subtle, bg = P.surface, italic = true },
+          SnacksExplorerGitCommit                = { fg = P.iris, bg = P.surface },
+
+          ---------------------------------------------------------------------
+          -- TELESCOPE (si lo usas en lugar de Snacks)
+          ---------------------------------------------------------------------
+          TelescopeNormal                        = { bg = P.surface, fg = P.text },
+          TelescopeBorder                        = { bg = P.surface, fg = P.surface },
+          TelescopeTitle                         = { bg = P.surface, fg = P.subtle, bold = false },
+          TelescopePromptNormal                  = { bg = P.surface, fg = P.text },
+          TelescopePromptBorder                  = { bg = P.surface, fg = P.surface },
+          TelescopePromptTitle                   = { bg = P.surface, fg = P.subtle, bold = false },
+          TelescopeResultsNormal                 = { bg = P.surface, fg = P.text },
+          TelescopeResultsBorder                 = { bg = P.surface, fg = P.surface },
+          TelescopeResultsTitle                  = { bg = P.surface, fg = P.subtle, bold = false },
+          TelescopePreviewNormal                 = { bg = P.surface, fg = P.text },
+          TelescopePreviewBorder                 = { bg = P.surface, fg = P.surface },
+          TelescopePreviewTitle                  = { bg = P.surface, fg = P.subtle, bold = false },
+          TelescopeSelection                     = { bg = P.highlight_med, fg = P.text },
+
+          ---------------------------------------------------------------------
+          -- NOICE (si usas noice.nvim para cmdline/messages)
+          ---------------------------------------------------------------------
+          NoicePopupmenu                         = { bg = P.surface, fg = P.text },
+          NoicePopupmenuBorder                   = { bg = P.surface, fg = P.surface },
+          NoiceCmdlinePopup                      = { bg = P.surface, fg = P.text },
+          NoiceCmdlinePopupBorder                = { bg = P.surface, fg = P.surface },
+          NoiceCmdlinePopupTitle                 = { bg = P.surface, fg = P.subtle, bold = false },
+        }
+      end
+
+      ---------------------------------------------------------------------------
+      -- HIGHLIGHTS PARA MODO TRANSPARENTE
+      ---------------------------------------------------------------------------
+      local function transparent_highlights()
+        return {
+
+          Normal                   = { bg = "NONE", fg = P.text },
+          NormalFloat              = { bg = "NONE", fg = P.text },
+          FloatBorder              = { bg = "NONE", fg = P.highlight_med },
+          FloatTitle               = { bg = "NONE", fg = P.subtle, bold = false },
+
+          VertSplit                = { fg = P.highlight_low, bg = "NONE" },
+          WinSeparator             = { fg = P.highlight_low, bg = "NONE" },
+
+          WinBar                   = { bg = "NONE", fg = P.subtle },
+          WinBarNC                 = { bg = "NONE", fg = P.muted },
+
+          Pmenu                    = { bg = "NONE", fg = P.text },
+          PmenuSbar                = { bg = "NONE" },
+          PmenuThumb               = { bg = "NONE" },
+          PmenuSel                 = { bg = P.highlight_med, fg = P.text },
+
+          SnacksPicker             = { bg = "NONE", fg = P.text },
+          SnacksPickerBorder       = { bg = "NONE", fg = P.highlight_med },
+          SnacksPickerTitle        = { bg = "NONE", fg = P.subtle, bold = false },
+
+          SnacksInputNormal        = { bg = "NONE", fg = P.text },
+          SnacksInputBorder        = { bg = "NONE", fg = P.highlight_med },
+          SnacksInputTitle         = { bg = "NONE", fg = P.subtle, bold = false },
+
+          RenderMarkdownCode       = { bg = "NONE" },
+          RenderMarkdownCodeInline = { bg = "NONE" },
+
+          GitSignsAdd              = { fg = P.git_add_color },
+          GitSignsChange           = { fg = P.git_change_color },
+          GitSignsDelete           = { fg = P.git_remove_color },
+
+          LspReferenceRead         = { bg = P.git_visual_bg, fg = P.reference_read },
+          LspReferenceText         = { bg = P.highlight_med, fg = P.reference_text },
+          LspReferenceWrite        = { bg = P.git_command_bg, fg = P.reference_write },
+
+          StatusLine               = { bg = "NONE", fg = P.subtle },
+          StatusLineNC             = { bg = "NONE", fg = P.inactive_text },
+
+          ---------------------------------------------------------------------
+          -- SNACKS EXPLORER GIT ICONS (modo transparente)
+          ---------------------------------------------------------------------
+          SnacksExplorerGitAdded                 = { fg = P.git_add_color, bg = "NONE" },
+          SnacksExplorerGitModified              = { fg = P.git_change_color, bg = "NONE" },
+          SnacksExplorerGitDeleted               = { fg = P.git_remove_color, bg = "NONE" },
+          SnacksExplorerGitStaged                = { fg = P.git_change_color, bg = "NONE" },
+          SnacksExplorerGitRenamed               = { fg = P.foam, bg = "NONE" },
+          SnacksExplorerGitUnmerged              = { fg = P.love, bg = "NONE" },
+          SnacksExplorerGitUntracked             = { fg = P.muted, bg = "NONE" },
+          SnacksExplorerGitIgnored               = { fg = P.subtle, bg = "NONE", italic = true },
+          SnacksExplorerGitCommit                = { fg = P.iris, bg = "NONE" },
+
+          TelescopeNormal          = { bg = "NONE", fg = P.text },
+          TelescopeBorder          = { bg = "NONE", fg = P.highlight_med },
+          TelescopeTitle           = { bg = "NONE", fg = P.subtle, bold = false },
+        }
+      end
+
+      ---------------------------------------------------------------------------
+      -- MINI STATUSLINE HIGHLIGHTS (SE APLICAN DESPUÉS DE ROSE PINE)
+      ---------------------------------------------------------------------------
+      local function apply_mini_statusline_highlights(transparent)
+        local bg = transparent and "NONE" or P.surface
+
+        local groups = {
+          -- Git status colors 
+          MiniStatuslineGitAdd    = { fg = P.git_add_color, bg = bg, bold = false },
+          MiniStatuslineGitChange = { fg = P.git_change_color, bg = bg, bold = false },
+          MiniStatuslineGitRemove = { fg = P.git_remove_color, bg = bg, bold = false },
+
+          MiniStatuslineGitAddBorder           = { fg = P.highlight_med, bg = bg },
+          MiniStatuslineGitChangeBorder        = { fg = P.highlight_med, bg = bg },
+          MiniStatuslineGitRemoveBorder        = { fg = P.highlight_med, bg = bg },
+
+          -- Mode indicators
+          MiniStatuslineModeNormal             = { fg = P.git_change_color, bg = bg, bold = true },
+          MiniStatuslineModeInsert             = { fg = P.git_add_color, bg = bg, bold = true },
+          MiniStatuslineModeVisual             = { fg = P.pine, bg = bg, bold = true },
+          MiniStatuslineModeReplace            = { fg = P.git_remove_color, bg = bg, bold = true },
+          MiniStatuslineModeCommand            = { fg = P.gold, bg = bg, bold = true },
+
+          -- Info segments
+          MiniStatuslineBranch                 = { fg = P.rose, bg = bg, bold = true },
+          MiniStatuslineBranchBorder           = { fg = P.highlight_med, bg = bg },
+          MiniStatuslineFileinfo               = { fg = P.foam, bg = bg },
+          MiniStatuslineFileinfoBorder         = { fg = P.highlight_med, bg = bg },
+          MiniStatuslineFilename               = { fg = P.text, bg = bg },
+          MiniStatuslineFilenameBorder         = { fg = P.highlight_med, bg = bg },
+          MiniStatuslineLocation               = { fg = P.subtle, bg = bg },
+          MiniStatuslineLocationBorder         = { fg = P.highlight_med, bg = bg },
+
+          -- Inactive window
+          MiniStatuslineInactiveFilename       = { fg = P.muted, bg = bg },
+          MiniStatuslineInactiveFilenameBorder = { fg = P.highlight_med, bg = bg },
+          MiniStatuslineInactiveFileinfo       = { fg = P.muted, bg = bg },
+          MiniStatuslineInactiveFileinfoBorder = { fg = P.highlight_med, bg = bg },
         }
 
-        -- Parts that change with transparency
-        if is_solid then
-          t.NormalFloat = { bg = 'base' }
-          t.Pmenu       = { bg = 'base' }
-          t.PmenuSbar   = { bg = 'highlight_low' }
-          t.PmenuThumb  = { bg = 'base' }
-          t.SnacksPicker  = { bg = 'color_sample' }
-          t.SnacksPickerInputBorder = { bg = 'color_sample', fg = 'highlight_low' }
-          t.SnacksPickerInputTitle = { bg = 'color_sample', fg = 'highlight_low' }
-          t.SnacksInputBorder = { fg = 'text' }
-          t.SnacksPickerBorder = { bg = 'color_sample', fg = 'color_sample' }
-          t.RenderMarkdownCode = { bg = 'overlay' }
-          t.RenderMarkdownCodeInline  = { bg = 'overlay' }
-          t.TroubleNormal = { bg = 'surface' }
-          t.TroubleCount  = { bg = 'NONE' }
-        else
-          t.NormalFloat = { bg = 'NONE' }
-          t.Pmenu       = { bg = 'NONE' }
-          t.PmenuSbar   = { bg = 'NONE' }
-          t.PmenuThumb  = { bg = 'NONE' }
-          t.SnacksPicker            = { bg = 'NONE' }
-          t.SnacksPickerInputBorder = { bg = 'NONE', fg = 'color_sample' }
-          t.SnacksPickerBorder = { fg = 'color_sample' }
-          t.RenderMarkdownCode        = { bg = 'NONE' }
-          t.RenderMarkdownCodeInline  = { bg = 'NONE' }
-          t.TroubleNormal = { bg = 'NONE' }
-          t.TroubleCount  = { bg = 'NONE' }
+        for name, spec in pairs(groups) do
+          vim.api.nvim_set_hl(0, name, spec)
         end
-
-        -- ► Conditional backgrounds for *Border groups (the fix)
-        local border_bg = is_solid and 'base' or 'NONE'
-
-        -- Git borders
-        t.GitBorderAdd    = { fg = 'git_add_bg',    bg = border_bg }
-        t.GitBorderChange = { fg = 'git_change_bg', bg = border_bg }
-        t.GitBorderRemove = { fg = 'git_remove_bg', bg = border_bg }
-
-        -- mini.statusline borders
-        t.MiniStatuslineModeBorder             = { fg = 'git_change_bg',        bg = border_bg }
-        t.MiniStatuslineBranchBorder           = { fg = 'branch_bg',            bg = border_bg }
-        t.MiniStatuslineDevinfoBorder          = { fg = 'devinfo_bg',           bg = border_bg }
-        t.MiniStatuslineFileinfoBorder         = { fg = 'fileinfo_bg',          bg = border_bg }
-        t.MiniStatuslineFilenameBorder         = { fg = 'filename_bg',          bg = border_bg }
-        t.MiniStatuslineLocationBorder         = { fg = 'location_bg',          bg = border_bg }
-        t.MiniStatuslineInactiveFileinfoBorder = { fg = 'inactive_fileinfo_bg', bg = border_bg }
-        t.MiniStatuslineInactiveFilenameBorder = { fg = 'inactive_border',      bg = border_bg }
-
-        -- Lines coherent with mode
-        t.StatusLine   = is_solid and { bg = 'base', fg = 'subtle' }        or { bg = 'NONE', fg = 'subtle' }
-        t.StatusLineNC = is_solid and { bg = 'base', fg = 'inactive_text' } or { bg = 'NONE', fg = 'inactive_text' }
-        t.WinBar       = is_solid and { bg = 'base', fg = 'subtle' }        or { bg = 'NONE', fg = 'subtle' }
-        t.WinBarNC     = is_solid and { bg = 'base', fg = 'inactive_text' } or { bg = 'NONE', fg = 'inactive_text' }
-        t.TabLine      = is_solid and { bg = 'base', fg = 'subtle' }        or { bg = 'NONE', fg = 'subtle' }
-        t.TabLineFill  = is_solid and { bg = 'base', fg = 'subtle' }        or { bg = 'NONE', fg = 'subtle' }
-
-        return t
       end
 
-      -- Apply palette + highlights according to mode
+      ---------------------------------------------------------------------------
+      -- FUNCIÓN QUE APLICA EL TEMA SEGÚN EL MODO
+      ---------------------------------------------------------------------------
       local function apply_ashen(transp)
-        vim.g.ashen_transparent = not not transp
-        local is_solid = not vim.g.ashen_transparent
+        vim.g.ashen_transparent = transp
 
-        require('rose-pine').setup({
-          variant = 'main',
-          dark_variant = 'main',
-          dim_inactive_windows = false,
-          extend_background_behind_borders = true,
-
-          enable = { terminal = true, legacy_highlights = true, migrations = true },
-          styles = { transparency = vim.g.ashen_transparent },
-
-          -- Palette (Flexoki neutrals + adjusted accents)
-          palette = {
-            main = {
-              base    = '#1C1B1A', surface = '#282726', overlay = '#343331',
-              text    = '#CECDC3', subtle  = '#878580', muted   = '#6F6E69',
-              love    = '#B76E74', gold    = '#B28A4F', rose    = '#937B97',
-              pine    = '#8C7D9B', foam    = '#7782A3', iris    = '#96799C',
-              highlight_low  = '#282726', highlight_med  = '#343331', highlight_high = '#403E3C',
-              branch_bg = '#2C262F',
-              git_add_bg = '#252D2C',  git_add_color = '#819787',
-              git_change_bg = '#22282B',  git_change_color = '#75929F',
-              git_remove_bg = '#2A252B',  git_remove_color = '#B0818B',
-              git_visual_bg = '#28252A',  git_command_bg = '#2C2723',
-              reference_text = '#9EA2B4', reference_read = '#7C8A96', reference_write = '#8A7C59',
-              inactive_border = '#1A1A1A', inactive_text = '#707070',
-              inactive_fileinfo_bg = '#1C1F22', inactive_fileinfo_text = '#606B75',
-              filename_bg = '#29252B', fileinfo_bg = '#1F2225', devinfo_bg = '#23292D', location_bg = '#1D1F22',
-              devinfo_text = '#7A8490', location_text = '#7A8190',
-              title_accent = '#4d4355', subtitle_tone = '#7c7565',
-              color_sample = '#1f1d1c'
-            },
-          },
-
-          -- Highlights merged according to transparency
-          highlight_groups = build_overlay_highlights(is_solid),
+        require("rose-pine").setup({
+          variant = "main",
+          dark_variant = "main",
+          enable = { terminal = true },
+          styles = { transparency = transp },
+          palette = { main = P },
+          highlight_groups =
+            transp and transparent_highlights()
+            or solid_highlights(),
         })
 
-        -- Enforce NONE for borders when transparent (belt & suspenders)
-        if not is_solid then
-          local force_none = {
-            'GitBorderAdd', 'GitBorderChange', 'GitBorderRemove',
-            'MiniStatuslineModeBorder','MiniStatuslineBranchBorder','MiniStatuslineDevinfoBorder',
-            'MiniStatuslineFileinfoBorder','MiniStatuslineFilenameBorder','MiniStatuslineLocationBorder',
-            'MiniStatuslineInactiveFileinfoBorder','MiniStatuslineInactiveFilenameBorder',
-          }
-          for _, g in ipairs(force_none) do
-            vim.api.nvim_set_hl(0, g, { bg = 'NONE' })
-          end
-        end
+        vim.cmd("colorscheme rose-pine")
 
-        vim.cmd('colorscheme rose-pine')
+        -- NOTE: Reaplica MiniStatusline highlights después de Rose Pine
+        vim.schedule(function()
+          apply_mini_statusline_highlights(transp)
+        end)
       end
 
-      -- User commands to toggle
-      vim.api.nvim_create_user_command('AshenSolid',       function() apply_ashen(false) end, {})
-      vim.api.nvim_create_user_command('AshenTransparent', function() apply_ashen(true)  end, {})
-      vim.api.nvim_create_user_command('AshenToggle',      function() apply_ashen(not vim.g.ashen_transparent) end, {})
+      ---------------------------------------------------------------------------
+      -- AUTOCOMMAND: Reaplica highlights si Rose Pine se recarga
+      ---------------------------------------------------------------------------
+      vim.api.nvim_create_autocmd("ColorScheme", {
+        pattern = "rose-pine",
+        callback = function()
+          vim.schedule(function()
+            apply_mini_statusline_highlights(vim.g.ashen_transparent)
+          end)
+        end,
+      })
 
-      -- Load using current flag (preserve last choice)
+      ---------------------------------------------------------------------------
+      -- COMANDOS DEL USUARIO
+      ---------------------------------------------------------------------------
+      vim.api.nvim_create_user_command("AshenSolid", function() apply_ashen(false) end, {})
+      vim.api.nvim_create_user_command("AshenTransparent", function() apply_ashen(true) end, {})
+      vim.api.nvim_create_user_command("AshenToggle", function() apply_ashen(not vim.g.ashen_transparent) end, {})
+
+      ---------------------------------------------------------------------------
+      -- CARGA INICIAL
+      ---------------------------------------------------------------------------
       apply_ashen(vim.g.ashen_transparent)
     end,
   }

@@ -1,66 +1,43 @@
 return {
-  { -- Collection of various small independent plugins/modules
+  {
     'echasnovski/mini.nvim',
+
     config = function()
-      -- Surrounds & pairs
+      ---------------------------------------------------------------------------
+      -- MÓDULOS BÁSICOS DE MINI.NVIM
+      ---------------------------------------------------------------------------
       require('mini.surround').setup {
         custom_surroundings = {
           [')'] = { output = { left = '(', right = ')' } },
           [']'] = { output = { left = '[', right = ']' } },
         },
       }
+
       require('mini.pairs').setup()
 
       local statusline = require('mini.statusline')
 
-      -- Helpers ---------------------------------------------------------------
-      local function pad(s) return ' ' .. (s or '') .. ' ' end
-
-      -- Cache de grupos "Flat" sin fondo
-      vim.g._ashen_flat_cache = vim.g._ashen_flat_cache or {}
-
-      local function ensure_flat_group(group)
-        local flat = group .. 'Flat'
-        if not vim.g._ashen_flat_cache[flat] then
-          local ok, hl = pcall(vim.api.nvim_get_hl, 0, { name = group, link = false })
-          if ok and hl then
-            vim.api.nvim_set_hl(0, flat, {
-              fg = hl.fg, bg = 'NONE',
-              bold = hl.bold or false,
-              italic = hl.italic or false,
-              underline = hl.underline or false,
-            })
-          else
-            -- fallback, al menos enlaza
-            vim.api.nvim_set_hl(0, flat, { link = group })
-          end
-          vim.g._ashen_flat_cache[flat] = true
-        end
-        return flat
+      ---------------------------------------------------------------------------
+      -- HELPERS
+      ---------------------------------------------------------------------------
+      local function pad(s)
+        return ' ' .. (s or '') .. ' '
       end
 
-      -- Segmento condicionado a transparencia:
-      -- - Transparente: píldoras ( ) salvo que opts.force_flat=true
-      -- - Sólido: siempre plano + sin fondo (usa grupo ...Flat)
-      local function segment(group, text, border_group, opts)
+      ---------------------------------------------------------------------------
+      -- SEGMENT: Renderiza texto con highlight group específico
+      ---------------------------------------------------------------------------
+      local function segment(group, text)
         text = tostring(text or '')
         if text == '' then return '' end
-        opts = opts or {}
-        local transparent = vim.g.ashen_transparent
 
-        if transparent and not opts.force_flat then
-          return table.concat({
-            '%#' .. border_group .. '#%*',
-            '%#' .. group .. '#' .. pad(text) .. '%*',
-            '%#' .. border_group .. '#%*',
-          })
-        else
-          -- plano: quitar fondo usando grupo Flat
-          local flat = ensure_flat_group(group)
-          return '%#' .. flat .. '#' .. pad(text) .. '%*'
-        end
+        -- Usa el grupo directamente (los highlights ya están definidos en colorscheme.lua)
+        return '%#' .. group .. '#' .. pad(text) .. '%*'
       end
 
+      ---------------------------------------------------------------------------
+      -- CUSTOM FILEINFO
+      ---------------------------------------------------------------------------
       local function custom_fileinfo()
         local ft  = vim.bo.filetype
         local enc = vim.bo.fileencoding or vim.bo.encoding
@@ -68,37 +45,56 @@ return {
         return ft .. '/' .. enc
       end
 
+      ---------------------------------------------------------------------------
+      -- GIT BRANCH
+      ---------------------------------------------------------------------------
       local function get_git_branch()
         local head = vim.b.gitsigns_head
           or (vim.b.gitsigns_status_dict and vim.b.gitsigns_status_dict.head)
+
         if head and head ~= '' then return head end
+
         local ok, out = pcall(vim.fn.systemlist, 'git rev-parse --abbrev-ref HEAD')
         if ok and out and out[1] and not out[1]:match('^fatal') then
           return out[1]
         end
+
         return ''
       end
 
+      ---------------------------------------------------------------------------
+      -- GIT STATUS (usa los highlight groups definidos en colorscheme.lua)
+      ---------------------------------------------------------------------------
       local function git_status()
         local gs = vim.b.gitsigns_status_dict
         if not gs then return '' end
+
         local parts = {}
+
         if (gs.added or 0) > 0 then
-          table.insert(parts, segment('MiniStatuslineGitAdd',    '+' .. gs.added,    'GitBorderAdd'))
+          table.insert(parts, segment('MiniStatuslineGitAdd', '+' .. gs.added))
         end
         if (gs.changed or 0) > 0 then
-          table.insert(parts, segment('MiniStatuslineGitChange', '~' .. gs.changed,  'GitBorderChange'))
+          table.insert(parts, segment('MiniStatuslineGitChange', '~' .. gs.changed))
         end
         if (gs.removed or 0) > 0 then
-          table.insert(parts, segment('MiniStatuslineGitRemove', '-' .. gs.removed,  'GitBorderRemove'))
+          table.insert(parts, segment('MiniStatuslineGitRemove', '-' .. gs.removed))
         end
+
         return table.concat(parts, ' ')
       end
 
-      -- Statusline ------------------------------------------------------------
+      ---------------------------------------------------------------------------
+      -- STATUSLINE: Definición final
+      ---------------------------------------------------------------------------
       statusline.setup {
         content = {
+
+          -----------------------------------------------------------------------
+          -- ACTIVA
+          -----------------------------------------------------------------------
           active = function()
+            -- Tabla de modos
             local mode_map = {
               ['n']  = { 'N',  'MiniStatuslineModeNormal' },
               ['no'] = { 'N',  'MiniStatuslineModeNormal' },
@@ -120,59 +116,59 @@ return {
               ['t']  = { 'T',  'MiniStatuslineModeNormal' },
             }
 
-            local current_mode = vim.api.nvim_get_mode().mode
-            local mode_display, mode_hl =
-              unpack(mode_map[current_mode] or { current_mode, 'MiniStatuslineModeNormal' })
+            -- Datos
+            local mode = vim.api.nvim_get_mode().mode
+            local mode_display, mode_hl = unpack(mode_map[mode] or { mode, 'MiniStatuslineModeNormal' })
 
             local filename = vim.fn.expand('%:~:.')
             if filename == '' then filename = '[No Name]' end
+
             local location = '%2l:%-2v'
             local fileinfo = custom_fileinfo()
             local git      = git_status()
             local branch   = get_git_branch()
 
-            -- Lado derecho: git + "segmentos" condicionales
+            -- Right section (git + info pills)
             local right_parts = {}
-            if git ~= '' then table.insert(right_parts, git) end
+
+            if git ~= '' then 
+              table.insert(right_parts, git) 
+            end
 
             local pills = {}
             if branch ~= '' then
-              table.insert(pills, segment('MiniStatuslineBranch',   ' ' .. branch, 'MiniStatuslineBranchBorder'))
+              table.insert(pills, segment('MiniStatuslineBranch', ' ' .. branch))
             end
-            table.insert(pills, segment('MiniStatuslineFileinfo',   fileinfo,        'MiniStatuslineFileinfoBorder'))
-            table.insert(pills, segment('MiniStatuslineLocation',   location,        'MiniStatuslineLocationBorder'))
+
+            table.insert(pills, segment('MiniStatuslineFileinfo', fileinfo))
+            table.insert(pills, segment('MiniStatuslineLocation', location))
 
             table.insert(right_parts, table.concat(pills, ' '))
-            local right_section = table.concat(right_parts, '  ') -- 2 espacios tras git
+            local right_section = table.concat(right_parts, '  ')
 
+            -- Final composition
             return statusline.combine_groups {
-              { strings = { segment(mode_hl, mode_display, 'MiniStatuslineModeBorder') } },
-              { strings = { segment('MiniStatuslineFilename', filename, 'MiniStatuslineFilenameBorder') } },
-              '', -- respiro
+              { strings = { segment(mode_hl, mode_display) } },
+              { strings = { segment('MiniStatuslineFilename', filename) } },
+              '',
               '%=',
               { strings = { right_section } },
             }
           end,
 
+          -----------------------------------------------------------------------
+          -- INACTIVA
+          -----------------------------------------------------------------------
           inactive = function()
             local filename = vim.fn.expand('%:~:.')
             if filename == '' then filename = '[No Name]' end
+
             local fileinfo = custom_fileinfo()
+
             return statusline.combine_groups {
-              { strings = {
-                  -- En transparente, fuerza plano para evitar “orejas”.
-                  segment('MiniStatuslineInactiveFilename', filename,
-                          'MiniStatuslineInactiveFilenameBorder',
-                          { force_flat = vim.g.ashen_transparent })
-                }
-              },
+              { strings = { segment('MiniStatuslineInactiveFilename', filename) } },
               '%=',
-              { strings = {
-                  segment('MiniStatuslineInactiveFileinfo', fileinfo,
-                          'MiniStatuslineInactiveFileinfoBorder',
-                          { force_flat = vim.g.ashen_transparent })
-                }
-              },
+              { strings = { segment('MiniStatuslineInactiveFileinfo', fileinfo) } },
             }
           end,
         },
