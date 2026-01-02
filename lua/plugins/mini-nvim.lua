@@ -1,10 +1,9 @@
 return {
   {
-    'echasnovski/mini.nvim',
-
+    'nvim-mini/mini.nvim',
     config = function()
       ---------------------------------------------------------------------------
-      -- MÓDULOS BÁSICOS DE MINI.NVIM
+      -- MINI.NVIM
       ---------------------------------------------------------------------------
       require('mini.surround').setup {
         custom_surroundings = {
@@ -30,8 +29,6 @@ return {
       local function segment(group, text)
         text = tostring(text or '')
         if text == '' then return '' end
-
-        -- Usa el grupo directamente (los highlights ya están definidos en colorscheme.lua)
         return '%#' .. group .. '#' .. pad(text) .. '%*'
       end
 
@@ -63,7 +60,7 @@ return {
       end
 
       ---------------------------------------------------------------------------
-      -- GIT STATUS (usa los highlight groups definidos en colorscheme.lua)
+      -- GIT STATUS
       ---------------------------------------------------------------------------
       local function git_status()
         local gs = vim.b.gitsigns_status_dict
@@ -85,16 +82,11 @@ return {
       end
 
       ---------------------------------------------------------------------------
-      -- STATUSLINE: Definición final
+      -- STATUSLINE
       ---------------------------------------------------------------------------
       statusline.setup {
         content = {
-
-          -----------------------------------------------------------------------
-          -- ACTIVA
-          -----------------------------------------------------------------------
           active = function()
-            -- Tabla de modos
             local mode_map = {
               ['n']  = { 'N',  'MiniStatuslineModeNormal' },
               ['no'] = { 'N',  'MiniStatuslineModeNormal' },
@@ -116,9 +108,9 @@ return {
               ['t']  = { 'T',  'MiniStatuslineModeNormal' },
             }
 
-            -- Datos
             local mode = vim.api.nvim_get_mode().mode
-            local mode_display, mode_hl = unpack(mode_map[mode] or { mode, 'MiniStatuslineModeNormal' })
+            local mode_display, mode_hl =
+              unpack(mode_map[mode] or { mode, 'MiniStatuslineModeNormal' })
 
             local filename = vim.fn.expand('%:~:.')
             if filename == '' then filename = '[No Name]' end
@@ -128,12 +120,9 @@ return {
             local git      = git_status()
             local branch   = get_git_branch()
 
-            -- Right section (git + info pills)
             local right_parts = {}
 
-            if git ~= '' then 
-              table.insert(right_parts, git) 
-            end
+            if git ~= '' then table.insert(right_parts, git) end
 
             local pills = {}
             if branch ~= '' then
@@ -146,7 +135,6 @@ return {
             table.insert(right_parts, table.concat(pills, ' '))
             local right_section = table.concat(right_parts, '  ')
 
-            -- Final composition
             return statusline.combine_groups {
               { strings = { segment(mode_hl, mode_display) } },
               { strings = { segment('MiniStatuslineFilename', filename) } },
@@ -156,9 +144,6 @@ return {
             }
           end,
 
-          -----------------------------------------------------------------------
-          -- INACTIVA
-          -----------------------------------------------------------------------
           inactive = function()
             local filename = vim.fn.expand('%:~:.')
             if filename == '' then filename = '[No Name]' end
@@ -173,6 +158,10 @@ return {
           end,
         },
       }
+
+      require('mini.move').setup()
+      require('mini.indentscope').setup()
+      require('mini.bracketed').setup()
     end,
   },
 }
