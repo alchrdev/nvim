@@ -1,6 +1,8 @@
 return {
   {
     "alchrdev/astereon.nvim",
+    -- dir = "~/personal/code/astereon.nvim/",
+    name = "astereon.nvim",
     lazy = false,
     dependencies = { "folke/snacks.nvim" },
     opts = {
@@ -9,6 +11,9 @@ return {
       },
       set_default_keymaps = true,
       open_new_note = false,
+      new_note = {
+        lowercase_filename = false,
+      },
 
       ignore_dirs = { ".git", ".obsidian", "node_modules", "daily" },
 
