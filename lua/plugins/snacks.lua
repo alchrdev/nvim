@@ -62,6 +62,14 @@ return {
       enabled = true,
       timeout = 3000,
     },
+    scratch = {
+      enabled = true,
+      win = {
+        position = "right",
+        backdrop = false,
+        width = 70
+      }
+    },
     picker = {
       enabled = true,
       sources = {
