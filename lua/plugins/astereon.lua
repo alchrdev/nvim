@@ -6,6 +6,10 @@ return {
     lazy = false,
     dependencies = { "folke/snacks.nvim" },
     opts = {
+      rename = {
+        update_link_text = "title",
+        update_yaml_title = true,
+      },
       ids = {
        format = "%Y%m%d%H%M",
       },
@@ -15,7 +19,7 @@ return {
         lowercase_filename = false,
       },
 
-      ignore_dirs = { ".git", ".obsidian", "node_modules", "daily" },
+      ignore_dirs = { ".git", ".obsidian", "node_modules", "90_vivre" },
 
       new_note_template = function(title, slug, id)
         return string.format([=[---
@@ -45,12 +49,10 @@ tags:
       },
 
       daily = {
-
         enable = true,
-        folder = "daily",
+        folder = "90_vivre",
         template = function(date, heading)
           local y, m, d = date:match("^(%d+)%-(%d+)%-(%d+)$")
-
           local now = os.time()
           local hh = tonumber(os.date("%H", now)) or 0
           local mi = tonumber(os.date("%M", now)) or 0
@@ -69,18 +71,34 @@ tags:
 
           local fmt = (require("astereon").config.ids and require("astereon").config.ids.format) or "%Y%m%d%H%M"
           local id = os.date(fmt, ts)
+          -- Formato: dddd, D de MMMM del año YYYY a las h:mm A
+          local full_date = os.date("%A, %d de %B del año %Y a las %I:%M %p", ts)
+          local time_now = os.date("%H:%M", ts)
 
           return table.concat({
             "---",
             ('id: "%s"'):format(id),
-            "weather:",
-            "bed_time:",
-            "get_up:",
-            "tags:",
-            "  - notes",
-            "  - journal",
+            "weather: ",
+            "bed_time: ",
+            "get_up: ",
+            "tags: [vivre]",
             "---",
             "",
+            ("# %s"):format(full_date),
+            "",
+            "## 🧭 DIRECTION",
+            "",
+            "- [ ] ",
+            "",
+            "## ♥️ SILENT",
+            "",
+            "- **::adventures::**",
+            ("    - **%s** - "):format(time_now),
+            "",
+            "---",
+            "### 🏴‍☠️ TO BE CONTINUED",
+            "",
+            "- [ ] ",
           }, "\n")
         end,
       },
