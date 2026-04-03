@@ -2,7 +2,7 @@ return {
   {
     "alchrdev/astereon.nvim",
     -- dir = "~/personal/code/astereon.nvim/",
-    name = "astereon.nvim",
+    -- name = "astereon.nvim",
     lazy = false,
     dependencies = { "folke/snacks.nvim" },
     opts = {
@@ -19,7 +19,7 @@ return {
         lowercase_filename = false,
       },
 
-      ignore_dirs = { ".git", ".obsidian", "node_modules", "90_vivre" },
+      ignore_dirs = {".obsidian", "node_modules", "10_vivre" },
 
       new_note_template = function(title, slug, id)
         return string.format([=[---
@@ -50,7 +50,7 @@ tags:
 
       daily = {
         enable = true,
-        folder = "90_vivre",
+        folder = "10_vivre",
         template = function(date, heading)
           local y, m, d = date:match("^(%d+)%-(%d+)%-(%d+)$")
           local now = os.time()
