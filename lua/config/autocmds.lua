@@ -48,3 +48,11 @@ vim.api.nvim_command('autocmd VimResized * wincmd =')
       end
     end,
   })
+
+-- Activar resaltado nativo de Treesitter
+vim.api.nvim_create_autocmd("FileType", {
+  group = vim.api.nvim_create_augroup("treesitter-highlight", { clear = true }),
+  callback = function()
+    pcall(vim.treesitter.start)
+  end,
+})
