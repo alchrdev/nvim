@@ -436,4 +436,6 @@ function M.setup(opts)
   setup_keymaps()
 end
 
+M.setup()
+
 return M
