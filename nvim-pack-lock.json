@@ -1,7 +1,7 @@
 {
   "plugins": {
     "astereon.nvim": {
-      "rev": "eb0f648db59402ff8c5890463e358c399dfac0e8",
+      "rev": "00031cbe112d99859af35cac7d92fb8af4309ac5",
       "src": "https://github.com/alchrdev/astereon.nvim"
     },
     "conform.nvim": {
@@ -9,7 +9,7 @@
       "src": "https://github.com/stevearc/conform.nvim"
     },
     "mini.nvim": {
-      "rev": "69b7433355664cf76898eb86a12a019f39bd86d1",
+      "rev": "27a3e747a4e603b4121f5759e74020430ec7b7d5",
       "src": "https://github.com/nvim-mini/mini.nvim"
     },
     "neovim": {
@@ -17,7 +17,7 @@
       "src": "https://github.com/rose-pine/neovim"
     },
     "nvim-lspconfig": {
-      "rev": "cb5bc0b2b35a6d513e3298d285db81453e791f4f",
+      "rev": "8a9378a822719346a0288fa004dab302ca3c0a8f",
       "src": "https://github.com/neovim/nvim-lspconfig"
     },
     "nvim-treesitter": {

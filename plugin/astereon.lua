@@ -88,7 +88,7 @@ cover: "[[.png]]"
       title
     )
   end,
-  logpose = function(title, slug, id)
+  log_pose = function(title, slug, id)
     return string.format(
       [=[---
 title: %q
