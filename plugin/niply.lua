@@ -22,7 +22,7 @@ local defaults = {
     add = "<leader>na",
     remove = "<leader>nr",
     menu = "<leader>nm",
-    clear = "<leader>nc",
+    clear = "<leader>nx",
     show = "<leader>ns",
     goto = true, -- map <leader>1..9
   },

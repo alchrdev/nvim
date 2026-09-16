@@ -1,6 +1,6 @@
 vim.pack.add({ 'https://github.com/neovim/nvim-lspconfig' })
 
-local servers = { 'html', 'cssls', 'emmet_ls', 'ts_ls', 'lua_ls' }
+local servers = { 'html', 'cssls', 'emmet_language_server', 'ts_ls', 'lua_ls' }
 
 vim.lsp.config.lua_ls = vim.tbl_deep_extend('force', vim.lsp.config.lua_ls or {}, {
   settings = {
@@ -24,6 +24,7 @@ vim.api.nvim_create_autocmd('LspAttach', {
     if client:supports_method('textDocument/completion') then
       vim.bo[args.buf].completeopt = 'menu,menuone,popup,noinsert'
       vim.lsp.completion.enable(true, client.id, args.buf, { autotrigger = true })
+      vim.keymap.set('i', '<C-Space>', '<C-x><C-o>', { buffer = args.buf, desc = 'Trigger LSP completion' })
     end
   end,
 })

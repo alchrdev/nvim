@@ -33,15 +33,18 @@ title: %q
         })
       end
 
-      local full_date = os.date('%A, %d de %B del año %Y a las %I:%M %p', ts)
-      local time_now = os.date('%H:%M', ts)
+      -- Utilizando el formateador nativo en español para evitar problemas de locales en Termux
+      local sd = require('astereon').spanish_date(ts)
+      local full_date = string.format("%s, %02d de %s del año %s a las %02d:%s %s",
+        sd.day_name, sd.day, sd.month_name, sd.year, sd.hour12, sd.minute, sd.am_pm)
+      local time_now = string.format("%02d:%s", sd.hour24, sd.minute)
 
       return string.format(
         [=[---
 id: %q
-weather: 
-bed_time: 
-get_up: 
+weather:
+bed_time:
+get_up:
 tags: [vivre]
 ---
 
@@ -49,17 +52,17 @@ tags: [vivre]
 
 ## 🧭 DIRECTION
 
-- [ ] 
+- [ ]
 
 ## ♥️ SILENT
 
 - **::adventures::**
-    - **%s** - 
+    - **%s** -
 
 ---
 ### 🏴‍☠️ TO BE CONTINUED
 
-- [ ] 
+- [ ]
 ]=],
         id,
         full_date,
@@ -88,7 +91,7 @@ cover: "[[.png]]"
       title
     )
   end,
-  logpose = function(title, slug, id)
+  log_pose = function(title, slug, id)
     return string.format(
       [=[---
 title: %q
@@ -107,15 +110,13 @@ tags: []
       title
     )
   end,
-
-  nagi = function(title, slug, id)
+  thousand_sunny = function(title, slug, id)
     return string.format(
       [=[---
 id: %q
 title: %q
-description: 
-tags: 
-cover: "[[.png]]"
+tags:
+cover: "[[]]"
 ---
 
 ]=],
@@ -137,7 +138,6 @@ require('astereon').setup({
   rename = {
     update_link_text = 'title',
     auto_prefers = 'title',
-    update_yaml_title = true,
   },
   ids = {
     format = '%Y%m%d%H%M',
@@ -148,24 +148,11 @@ require('astereon').setup({
     lowercase_filename = false,
   },
   media = {
-    snacks = {
-      preview = true,
-      preset = 'telescope',
-    },
+    paste_folder = '99_cameko',
   },
-
   ignore_dirs = { '.obsidian', 'node_modules', '50_galley' },
-
   new_note_preferred_dirs = { '10_vivre', '20_nagi' },
-
   templates = blueprints,
-
-  snacks = {
-    enable = true,
-    preset = 'vscode',
-    show_index_numbers = false,
-  },
-
   auto_refresh = {
     enable = true,
   },

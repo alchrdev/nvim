@@ -9,13 +9,8 @@ ts_configs.setup({
   ensure_installed = {
     'html',
     'css',
-    'markdown',
-    'markdown_inline',
     'yaml',
-    'vim',
-    'vimdoc',
     'typescript',
-    'lua',
     'tsx',
     'javascript',
   },
